@@ -13,10 +13,6 @@
 #include "mm.h"
 //#define foreach_         BOOST_FOREACH
 
-typedef struct {
-    realtype p[3];
-} *UserData;
-
 using namespace std;
 
 char *program_name;
