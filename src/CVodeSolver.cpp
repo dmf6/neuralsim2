@@ -33,8 +33,3 @@ int CVodeSolver::f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
 int CVodeSolver::fadvance(realtype tout, realtype t) {
     return CVode(cvode_mem, tout, yi, &t, CV_NORMAL);
 }
-
-int CVodeSolver::getDerivative(realtype tout, int k, N_Vector dky) {
-    return CVodeGetDky(cvode_mem, tout, k, dky);
-}
-
