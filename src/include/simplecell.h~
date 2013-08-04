@@ -13,8 +13,8 @@
 #define GAXIAL2 0
 
 #define CM 1
-#define CM_AXON 1.5
-#define GNA_AXON 300
+#define CM_AXON 1
+#define GNA_AXON 0// 300
 #define GK_AXON 52.5
 #define GL_AXON 0.0018
 #define EL_AXON -50
@@ -47,7 +47,7 @@
 #define TAU1_CA_H p[13]
 #define TAU2_CA_H p[14]
 
-#define V_THR -35
+#define V_THR -35.0
 using namespace std;
 
 class SimpleCell: public Neuron {
@@ -55,9 +55,8 @@ class SimpleCell: public Neuron {
     int pno;
     double *p;
     realtype iapp;
+    realtype voltage;
     int flag;
-    double oldV;
-    
     
   public:
         /* Make another constructor to pass in an array of parameter values *argv*/

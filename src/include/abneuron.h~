@@ -44,7 +44,6 @@ class ABNeuron: public Neuron {
     double *p;
     ofstream out;
     char outfile[80];
-    int k;
     
   public:
         /* Make another constructor to pass in an array of parameter values *argv*/

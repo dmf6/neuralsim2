@@ -1,26 +1,26 @@
-#ifndef __SIMPLECELL2_H
-#define __SIMPLECELL2_H
+#ifndef __SIMPLECELL3_H
+#define __SIMPLECELL3_H
 
 #include <cstring>
 #include "neuron.h"
 
-#define CM 1
+#define CM 4
 
 #define GL p[0]
 #define GH p[1]
 #define GMI p[2]
 #define EL  -60
-#define EH -20
-#define EMI -0
+#define EM -77
+#define EMI -10
 
 /* h-current activation pars */
-#define VH_H p[3]
-#define K_H p[4]
+#define VH_M p[3]
+#define K_M p[4]
 
-#define TAU1H p[5]
-#define TAU2H p[6]
-#define TAU_VH_H p[7]
-#define TAU_K_H p[8]
+#define TAU1M p[5]
+#define TAU2M p[6]
+#define TAU_VH_M p[7]
+#define TAU_K_M p[8]
 
 /* Imi activation pars */
 #define VH_MI_M p[9]

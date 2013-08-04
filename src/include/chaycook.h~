@@ -1,0 +1,53 @@
+#ifndef __CHAYCOOK_H
+#define __CHAYCOOK_H
+
+#include <cstring>
+#include "neuron.h"
+
+#define VCLAMP 1
+
+#define I0 -50
+#define SIGMA 50
+#define C 4524
+#define VCA 100
+#define VNA 60
+#define VK -80
+#define VL -60
+#define VM -22
+#define VN -9
+#define VS -22
+#define SM 7.5
+#define SN 10
+#define SS 10
+#define TAU 50
+#define TAUN 9.09
+#define TAUS 100
+#define GI 250
+#define GK 1300
+#define GL 50
+#define GS 10
+#define ALPHAN 0.000005727
+#define KC 0.03
+#define LAMBDA 0.6
+#define F 0.0015
+
+using namespace std;
+
+class ChayCook: public Neuron {
+    int type;
+    int pno;
+    double *p;
+    realtype iapp;
+    realtype voltage;
+    int flag;
+    
+  public:
+        /* Make another constructor to pass in an array of parameter values *argv*/
+    ChayCook(const string name, double *inp, int inpno, int iniVarNo, int mode);
+    virtual ~ChayCook();
+    void set_p(double *);
+    int derivative(realtype , N_Vector *, N_Vector *, void *);
+    void currents(realtype, N_Vector, N_Vector, ostream&);
+};
+
+#endif

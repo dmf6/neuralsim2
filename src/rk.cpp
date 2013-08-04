@@ -20,15 +20,15 @@ RK::~RK() {
     N_VDestroy_Serial(yt);
 }
 
-void RK::integrate(realtype t, N_Vector y, N_Vector yout, N_Vector ydot, NeuronModel *model, realtype h) {
-
+void RK::fadvance(realtype t, N_Vector y, N_Vector yout, N_Vector ydot, NeuronModel *model, realtype h) {
     void *user_data;
     realtype *yi, *yd, *yo, *yt_data;
     yi = NV_DATA_S(y);
     yo = NV_DATA_S(yout);
     yd = NV_DATA_S(ydot);
     yt_data = NV_DATA_S(yt);
-    
+
+        // for voltage clamp skip voltage since we are controlling it
     for (i=0; i < n; i++) {
         yt_data[i] = yi[i] ; 
     }
@@ -40,13 +40,19 @@ void RK::integrate(realtype t, N_Vector y, N_Vector yout, N_Vector ydot, NeuronM
     for (i=0; i < n; i++) {
         yt_data[i] = yi[i] + h*k[0][i];
     }
+    
     model->derivative(t+h, yt, ydot, user_data);  
     for (i=0; i < n; i++) {
         k[1][i] = yd[i]; //k2 = h* f(tn+h, yn + h*f(tn, yn))
+    
+        
     }
-  
     /* yn+1 = yn + (h/2)*[f(tn, yn) + f(tn+h, yn + h*f(tn, yn))] */
     for (i=0; i < n; i++) {
         yo[i] = yi[i] + (h/2)*(k[0][i] + k[1][i]);
     }
 }
+
+// void RK::swap(N_vector y, N_Vector yout) {
+    
+// }

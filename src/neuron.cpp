@@ -14,13 +14,13 @@ Neuron::Neuron(const string name, int iniVarNo, int mode) {
     this->mode = mode;
     spikeCount = 0; /* number of spikes */
     period = INF;
-    cout << "The index of this neuron is " << idx << "\n";
+        //cout << "The index of this neuron is " << idx << "\n";
     voltage = -60;
     
 }
 
 Neuron::~Neuron() {
-    cout << "Deallocated neuron memory" << endl;
+        //cout << "Deallocated neuron memory" << endl;
     
     for (den_it = den.begin(); den_it != den.end(); ++den_it) {
         (*den_it)->target= NULL;
@@ -29,13 +29,13 @@ Neuron::~Neuron() {
 
 void Neuron::init(N_Vector y, int start, double *iniVars, int n) {
         // copy the contents of from iniVars to y
-    cout << "start is " << start << " and number of variables is " << n << endl;
+        //cout << "start is " << start << " and number of variables is " << n << endl;
     
     realtype *yi;
     yi = NV_DATA_S(y);
     
     for(int i = 0; i < n; i++) {
-        cout << idx << "\t" << i << "\t" <<  iniVars[i] << "\n";
+            //cout << idx << "\t" << i << "\t" <<  iniVars[i] << "\n";
         
         yi[start+i] = iniVars[i];
     }
@@ -45,8 +45,8 @@ void Neuron::setTol(N_Vector tol, int start, int n) {
     realtype *ytol;
     ytol = NV_DATA_S(tol);
     
-    for(int i = 0; i < 34; i++) {
-        ytol[i] = ATOL;
+    for(int i = 0; i < n; i++) {
+        ytol[start+i] = ATOL;
     }
 }
 

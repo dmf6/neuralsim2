@@ -1,0 +1,19 @@
+#ifndef _CVODE_H_INCLUDED_
+#define _CVODE_H_INCLUDED_
+
+class CVode {
+
+  public:
+    CVode();
+    ~CVode();
+    
+
+};
+
+
+
+
+
+
+
+#endif /* _CVODE_H_INCLUDED */

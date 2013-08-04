@@ -13,9 +13,6 @@
 #define T0 0.095367432            /* start time */
 #define RTOL  RCONST(1.0e-8)   /* scalar relative tolerance            */
 
-/* definition of the function to be passed to CVodeSolver */
-typedef int (*RhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data);
-
 class NeuronModel;
 
 class CVodeSolver {
@@ -23,7 +20,6 @@ class CVodeSolver {
     N_Vector yi, abstol;
     realtype reltol;
     void *cvode_mem;
-    RhsFn rhsFn;
     
   public:
     
@@ -37,7 +33,7 @@ class CVodeSolver {
          *  (5) Set user data
          *  (6) Attach Linear solver module (CVDense)
          */
-    CVodeSolver(int, N_Vector, N_Vector, NeuronModel *, RhsFn);
+    CVodeSolver(int, N_Vector, NeuronModel *);
     
         /* Deallocate memory for solution vector */
     ~CVodeSolver();
@@ -46,8 +42,7 @@ class CVodeSolver {
     int f(realtype t, N_Vector y, N_Vector dy, void *user_data);
     
         /* advance solution in time */
-    int fadvance(realtype tout, realtype t);
+    void fadvance(realtype tout, realtype t);
 
-    int getDerivative(realtype t, int k, N_Vector dky);
 };
 #endif /* _CVODESOLVER_H_INCLUDED */

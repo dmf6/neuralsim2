@@ -1,0 +1,120 @@
+#ifndef __PDNEURON_H
+#define __PDNEURON_H
+
+#include <cstring>
+#include "neuron.h"
+
+#define IAPP 0// (1 nA)
+#define CM 12 //(uF)
+
+/* maximal conductances  (uS) */
+#define GL p[0]
+#define GH p[1]
+#define GA p[2]
+#define  GKD p[3]
+#define GCAT p[4]
+#define GCAS p[5]
+#define GKCA p[6]
+#define GNAP 0
+
+/* reversal potentials */
+#define EL  p[8]
+#define EH p[9]
+#define EK p[10]
+#define ENA p[11]
+
+/* h-current activation pars */
+#define TAU1H p[12]
+#define TAU2H p[13]
+#define VH_H p[14]
+#define K_H p[15]
+
+/* A-current activation pars */
+#define TAU1_A_M p[16]
+#define TAU2_A_M p[17]
+#define VH_A_M p[18]
+#define K_A_M p[19]
+
+/* A-current inactivation pars */
+#define TAU1_A_H p[20]
+#define TAU2_A_H p[21]
+#define VH_A_H p[22]
+#define K_A_H p[23]
+
+/* delayed-rectifier activation pars */
+#define TAU1_KD p[24]
+#define TAU2_KD p[25]
+#define VH_KD p[26]
+#define K_KD p[27]
+
+/* Transient calcium activation pars */
+#define TAU1_CAT_M p[28]
+#define TAU2_CAT_M p[29]
+#define VH_CAT_M p[30]
+#define K_CAT_M p[31]
+
+/* Transient calcium inactivation pars */
+#define TAU1_CAT_H p[32]
+#define TAU2_CAT_H p[33]
+#define VH_CAT_H p[34]
+#define K_CAT_H p[35]
+
+/* persistent calcium current */
+#define TAU1_CAS p[36]
+#define TAU2_CAS p[37]
+#define VH_CAS p[38]
+#define K_CAS p[39]
+
+/* calcium-dependent potassium activation pars */
+#define TAU1_KCA p[40]
+#define TAU2_KCA p[41]
+#define VH_KCA p[42]
+#define K_KCA p[43]
+
+/* persistent sodium activation pars */
+#define TAU1_NAP_M 19.8 
+#define TAU2_NAP_M -13.4
+#define VH_NAP_M -26.8
+#define K_NAP_M 8.2
+
+/* persistent sodium inactivation pars */
+#define TAU1_NAP_H 666
+#define TAU2_NAP_H -379
+#define VH_NAP_H -48.5
+#define K_NAP_H 4.8
+
+#define GAXIAL 1.05 //nS
+#define CM_AXON 6//uF
+
+#define AXON_GL p[52]
+#define AXON_GK p[53]
+#define AXON_GNA 0
+
+#define AXON_TAU1_K_M p[54]
+#define AXON_TAU2_K_M p[55]
+#define VH_K_AXON p[56]
+#define K_K_AXON p[57]
+
+#define F 0.515
+#define CO 0.5
+#define TAUCA 300.0
+#define CAO 13000 //(uM)
+
+class PDNeuron: public Neuron {
+    int type;
+    int m_dValue;
+    int pno;
+    double *p;
+    ofstream out;
+    char outfile[80];
+    
+  public:
+        /* Make another constructor to pass in an array of parameter values *argv*/
+    PDNeuron(const string name, double *inp, int inpno, int iniVarNo, int mode);
+    virtual ~PDNeuron();
+    void set_p(double *);
+    int derivative(realtype , N_Vector *, N_Vector *, void *);
+    void currents(realtype, N_Vector, N_Vector);
+};
+
+#endif

@@ -8,10 +8,10 @@
 
 #define GL p[0]
 #define GH p[1]
-#define GMI p[2]
+#define GK p[2]
 #define EL  -60
 #define EH -20
-#define EMI -0
+#define EK -80
 
 /* h-current activation pars */
 #define VH_H p[3]

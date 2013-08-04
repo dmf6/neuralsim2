@@ -22,22 +22,22 @@ realtype Electrode::getIapp() {
 
 void Electrode::setIapp(realtype t, realtype amp, int mode)  {
     double L = log(FMAX/FMIN)/duration;
-    double precycle_dur = 0.1*num_precycles*duration;
+        //double precycle_dur = 0.1*num_precycles*duration;
     switch(waveform) {
         case SINE:
             current = bias + amp*sin(2*PI*0.75*t/1000);
             break;
             
         case ZAP:
-            freq = (t < 30000) ? 0.1*t : (FMIN*((exp(L*(t-30000))-1)/(L*(t-30000))))*(t-30000);
-
+                // freq = (t < 30000) ? 0.1*t : (FMIN*((exp(L*(t-30000))-1)/(L*(t-30000))))*(t-30000);
+            freq = (FMIN*((exp(L*(t))-1)/(L*(t))));
                 /* for voltage clamp mode */
             if (mode==VCLAMP) {
-                current = bias + amp+amp*sin(2*PI*0.001*freq + 3*(PI/2));
+                current = bias + amp+amp*sin(2*PI*freq/1000*t + 3*(PI/2));
             }
                 /* for current clamp mode */
             else {
-                current =  bias +amp*sin(2*PI*0.001*freq + 3*(PI/2));
+                current =  bias +amp*sin(2*PI*freq*t/1000 + 3*(PI/2));
             }
             break;
 
@@ -45,10 +45,12 @@ void Electrode::setIapp(realtype t, realtype amp, int mode)  {
                 /* command pulse of amplitude amp between START and
                  * START + DURATION */
             if (((t - start) > 0) && (t < (start + duration))) {
-                current = amp*bias;
+                current = bias + amp;
+                    // cout << current << "\t" << bias << "\t" << amp << "\n";
+                
             }
             else {
-                current = 0.0;
+                current = bias;
             }
             
             break;

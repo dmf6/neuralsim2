@@ -1,0 +1,46 @@
+#ifndef _MM_H_INCLUDED_
+#define _MM_H_INCLUDED_
+
+/* cvode libraries */
+#include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
+#include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
+#include <cvode/cvode_dense.h>       /* prototype for CVDense */
+#include <sundials/sundials_dense.h> /* definitions DlsMat DENSE_ELEM */
+#include <sundials/sundials_types.h> /* definition of type realtype */
+
+#include "neuron.h"
+#include "synapse.h"
+#include "electrode.h"
+#include "simplecell.h"
+#include "neuronmodel.h"
+#include "rk.h"
+
+int derivative(realtype t, N_Vector y, N_Vector ydot, void *user_data);
+int f(realtype t, N_Vector y, N_Vector dy, void* user_data);
+void swap(N_Vector y, N_Vector yout);
+static int check_flag(void *flagvalue, char *funcname, int opt);
+
+//#define NEQ 16 /* Number of equations */
+#define NEQ 4
+#define TSTEP  0.095367432    /* stepsize */
+#define T0 0            /* start time */
+#define TSTOP 100000    /* duration */
+
+#define NUM_PARS 21 /* number of parameters */
+
+/* set initial calcium concentration at 10e-4 mM */
+//double PD_INIVARS[NEQ] = {-70, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, -60.0, 0.0, 0.0, 0.0};
+double SC_INIVARS[NEQ] = {-60, 0.0, 0.0, 0.0};
+
+/* run first in VCLAMP and then in ICLAMP */
+#define ICLAMP 0
+#define VCLAMP 1
+
+/*Function f(t, y) should be defined in this manner */
+typedef int (*RhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data);
+
+#define T1    RCONST(1.0)      /* first output time      */
+#define NOUT  1000000    /* number of output times */
+#define RTOL  RCONST(1.0e-8)   /* scalar relative tolerance            */
+
+#endif /* _MM_H_INCLUDED_ */

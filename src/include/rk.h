@@ -22,7 +22,7 @@ class RK  {
         /*constructor should take , yerr_vec, h, time, dimension N, NeuronModel */
     RK(int dim, int order);
     ~RK();
-    void integrate(realtype t, N_Vector, N_Vector, N_Vector, NeuronModel *model, double h);
+    void fadvance(realtype t, N_Vector, N_Vector, N_Vector, NeuronModel *model, double h);
 
     inline int dim() {
         return n;

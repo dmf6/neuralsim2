@@ -8,7 +8,7 @@ HH::HH(const string name=NULL, double *inp=NULL, int inpno=0, int iniVarNo=0, in
         set_p(inp);
     }
     iapp = 0;
-    voltage = -70.0;
+    voltage = -65.0;
 }
 
 
@@ -27,7 +27,7 @@ int HH::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_data) {
     realtype am, bm, ah, bh, an, bn;
     realtype minf, hinf, ninf, taum, tauh, taun;
     realtype v, m, h, n;
-    realtype Il, INa, Ik, iapp;
+    realtype Il, INa, Ik, Iext;
     realtype *yi, *yd;
         
     N_Vector yn = *y;
@@ -35,9 +35,16 @@ int HH::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_data) {
     
     yi = NV_DATA_S(yn);
     yd = NV_DATA_S(ydn);
-
+    
+    Iext = 0.0;
+    for ( iapp_it = electrodes.begin();  iapp_it != electrodes.end(); ++iapp_it) {
+        Iext += (*iapp_it)->getIapp();
+    }
+    v = Iext;
+    
     v = yi[0]; m = yi[1]; h = yi[2]; n = yi[3];
-
+        //cout << v <<"\t"<< Iext << "\n";
+    
     // am =  -0.1 * (25.0-v) / (exp(-0.1*(25.0+v)) - 1.0);
     // bm =  4.0 * exp(-v/18.0);
 
@@ -53,20 +60,17 @@ int HH::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_data) {
     tauh= 1 + (11/(1+exp((v+62)/10)));
     taun= 1 + (6/(1+exp((v+53)/16)));
     
-    iapp = 0.0;
-    for ( iapp_it = electrodes.begin();  iapp_it != electrodes.end(); ++iapp_it) {
-        iapp += (*iapp_it)->getIapp();
-    }
-    
     Il = GL*(v-EL);
     Ik = GK*pow(n, 4)*(v -EK);
     INa = GNA*pow(m, 3)*h*(v-ENA);
 
-        //cout << v << "\t" <<  m << "\t" << h << "\t" << n << "\n";
+        //cout << t << "\t" <<  Ik << "\t" << INa << "\n";
+        //cout << v << "\n";
     
         /* just one compartment in voltage clamp ...for now */
     if (mode == VCLAMP) {
-        yd[0] = (-iapp-(Il+Ik+INa))/CM;
+        yd[0] = Iext;
+        
     }
     else {
          yd[0] = (iapp - (Il + Ik + INa))/CM;
@@ -78,7 +82,9 @@ int HH::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_data) {
     yd[1] = (minf-m)/taum;
     yd[2] = (hinf-h)/tauh;
     yd[3] = (ninf-n)/taun;
-       
+    
+    voltage = v;
+    
     return (0);
 }
 
@@ -91,16 +97,20 @@ void HH::currents(realtype  t, N_Vector y, N_Vector ydot, ostream& out) {
     yi = NV_DATA_S(y);
     yd = NV_DATA_S(ydot);
     v = yi[0]; m = yi[1]; h = yi[2]; n = yi[3];
-    dvdt = yd[0];
 
     Il = GL*(v-EL);
     Ik = GK*pow(n, 4)*(v - EK);
-        //INa = GNA*pow(m, 3)*h*(v-ENA);
+    INa = GNA*pow(m, 3)*h*(v-ENA);
     Il = GL*(v-EL);
-    Icap = CM*dvdt;
- 
+    dvdt =v;
+    
+        //out << t << '\t' << (olddvdt -dvdt)/0.05 << '\n';
+    Icap = CM*(-0.001*(olddvdt -dvdt)/0.05);
+    olddvdt = dvdt;
+
+    
     // Iapp = sum of I_ion + Icap 
-    I_ion = (Il + INa + Ik);
-    iapp = (I_ion + 0.001*Icap);
-    out << t  << '\t' << iapp << '\t' << v << '\n';
+    I_ion = (INa+Ik+Il);
+    iapp = (I_ion+Icap);
+    out << t  << '\t' << iapp << '\t' << voltage <<'\n';
 }

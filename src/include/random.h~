@@ -1,0 +1,36 @@
+#ifndef __RANDOM_H
+#define __RANDOM_H
+
+#include "boost/random.hpp"
+#include <boost/random/variate_generator.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/math/distributions/normal.hpp> // for normal_distribution
+using namespace boost;
+using namespace std;
+
+
+
+class Random {
+    
+  public:
+    typedef boost::mt19937 RNGType;
+        //typedef boost::mt19937 gen(static_cast<unsigned long>(std::time(0)));
+           
+    RNGType rg;
+    
+    /* boost::variate_generator< boost::mt19937, boost::normal_distribution<double> > rand(rg, norm_dst); */
+    Random() {};
+    void setSeed(int seed);
+    double nextDouble( double lowerLimit, double upperLimit );
+    int nextInt(int lowerLimit, int upperLimit);
+    std::ptrdiff_t operator()( std::ptrdiff_t arg ) { 
+        return static_cast< std::ptrdiff_t >( rand() );
+     }
+    double randn(double mean, double variance);
+    
+    
+};
+
+#endif

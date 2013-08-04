@@ -11,7 +11,7 @@
 #define GMI p[2]
 #define EL  -60
 #define EH -20
-#define EMI -0
+#define EMI -10
 
 /* h-current activation pars */
 #define VH_H p[3]

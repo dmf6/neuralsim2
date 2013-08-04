@@ -15,7 +15,7 @@ CVodeSolver::CVodeSolver(int n, N_Vector yi, N_Vector abstol, NeuronModel *model
 }
 
 CVodeSolver::~CVodeSolver() {
-    cout << "Deallocated CVode memory" << endl;
+        // cout << "Deallocated CVode memory" << endl;
     
    N_VDestroy_Serial(yi);
    N_VDestroy_Serial(abstol);
@@ -33,3 +33,8 @@ int CVodeSolver::f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
 int CVodeSolver::fadvance(realtype tout, realtype t) {
     return CVode(cvode_mem, tout, yi, &t, CV_NORMAL);
 }
+
+int CVodeSolver::getDerivative(realtype tout, int k, N_Vector dky) {
+    return CVodeGetDky(cvode_mem, tout, k, dky);
+}
+

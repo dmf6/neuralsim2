@@ -6,12 +6,11 @@
 //#include <ostream>
 //#include <boost/iostreams/device/file.hpp>
 //#include <boost/iostreams/stream.hpp>
-#include "mm.h"
 //#include <boost/foreach.hpp>
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
-
+#include "mm.h"
 //#define foreach_         BOOST_FOREACH
 
 typedef struct {
@@ -38,15 +37,16 @@ int main(int argc, char *argv[]) {
     string id;
     double upper_bound, lower_bound;
     realtype t, tout, reltol;
-    void *cvode_mem;
     N_Vector yi, yo, yd, abstol;
     int flag, iout;
     int numVars;
     ofstream os;
     list<Neuron *> neurs;
     list<Synapse *> syns;
-    
-    int mode = ICLAMP;
+        /* set solver to either RK or CVODE */
+
+
+    int mode = VCLAMP;
     double *par_ptr = new double[NUM_PARS];
          
     for (int i = 1; i < argc; i++) {
@@ -73,67 +73,75 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    
         /* create neurons */
-    Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, mode);
-    Neuron *pd = new PDNeuron("PD", par_ptr, NUM_PARS, NEQ, mode);
+        //Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, mode);
+        //Neuron *pd = new PDNeuron("PD", par_ptr, NUM_PARS, NEQ, mode);
+    Neuron *sc = new SimpleCell("SC", par_ptr, NUM_PARS, NEQ, mode);
     
         /*initialize the y vector using the number of state variables
          * for each neuron */
-    int abVarNo, pdVarNo;
+        //int abVarNo, pdVarNo;
     int nVars =0;
-    abVarNo = ab->getIVarNo();
-    pdVarNo = pd->getIVarNo();
-    numVars = abVarNo + pdVarNo;
-    cout << "Number of Variables " << numVars << endl;
-
+        //pdVarNo = pd->getIVarNo();
+        //abVarNo = ab->getIVarNo();
+    
+    numVars = sc->getIVarNo();//abVarNo;// + pdVarNo;
+     
     yi = N_VNew_Serial(numVars);
-             //yo = N_VNew_Serial(numVars);
-             //yd = N_VNew_Serial(numVars);
+    yo = N_VNew_Serial(numVars);
+    yd = N_VNew_Serial(numVars);
     abstol = N_VNew_Serial(numVars);
     reltol = RTOL;
     
-    ab->init(yi, nVars, PD_INIVARS, abVarNo);
-    ab->setTol(abstol, nVars, abVarNo);
-    nVars+=abVarNo;
-    pd->init(yi, nVars, PD_INIVARS, pdVarNo);
-    pd->setTol(abstol, nVars, pdVarNo);
+    sc->init(yi, nVars, SC_INIVARS, sc->getIVarNo());
+    sc->setTol(abstol, nVars, sc->getIVarNo());
+    // nVars+=abVarNo;
+    // pd->init(yi, nVars, PD_INIVARS, pdVarNo);
+    // pd->setTol(abstol, nVars, pdVarNo);
     
            /* add neurons to the list */
-    neurs.push_back(ab);
-    neurs.push_back(pd);
+        //neurs.push_back(ab);
+        //neurs.push_back(pd);
+    neurs.push_back(sc);
     
         /* create synapses and add to list */
-    Synapse *gapAB = new Gap(ab, pd, 1, 1);
-    gapAB->setGmax(0);
-    Synapse *gapPD = new Gap(pd, ab, 1, 1);
-    gapPD->setGmax(0);
+    // Synapse *gapAB = new Gap(ab, pd, 1, 1);
+    // gapAB->setGmax(0);
+    // Synapse *gapPD = new Gap(pd, ab, 1, 1);
+    // gapPD->setGmax(0);
 
-    syns.push_back(gapAB);
-    syns.push_back(gapPD);
-    
+    // syns.push_back(gapAB);
+    // syns.push_back(gapPD);
+   
         /* create electrode */
-    Electrode *e = new Electrode(ab, 0.0);
-
+    Electrode *e = new Electrode(sc, 0.0);
+    // e->setWaveform(PULSE);
+    // e->setStart(1000);
+    // e->setDuration(2000);
+    // e->setBias(-65);
+    e->setWaveform(ZAP);
+    e->setDuration(TSTOP);
+    e->setBias(-60);
+    
         /* switch on numerical method given in command-line arguments */
     NeuronModel *model = new NeuronModel(&neurs, &syns, numVars, os);
 
         /*make integration classes for RK and CVode */
-    RhsFn myfunc =&f;
+        RhsFn myfunc =&f;
         /*myfunc is the function to be solved by CVode */
-    CVodeSolver *cvode = new CVodeSolver(numVars, yi, abstol, model, myfunc);
-
+      CVodeSolver *cvode = new CVodeSolver(numVars, yi, abstol, model, myfunc);
+ 
         /* class for RK fadvance */
-        /*int order = 2;
-         * RK *rk = new RK(numVars, order);
-         */
-
+     RK *rk = new RK(numVars, 2);
+ 
         /* append thread id to output file name */
     string filename = "SC";
     filename += id;
     filename += ".asc";
     ofstream out;
     out.open(filename.c_str());
-     
+
     realtype isyn = 0.0; tout = 0.0;
     int count = 0;
 
@@ -144,36 +152,59 @@ int main(int argc, char *argv[]) {
      char buf[10241];
      out.rdbuf()->pubsetbuf(buf, sizeof(buf));
 
-     
          /*****************************************************************
          *                     start CVode loop (only use for current clamp)
          *
          ******************************************************************/  
     iout = 0;  tout = T1;
-    while(1) {
-            //rk->fadvance();
-        
-        flag = cvode->fadvance(tout, t);
 
-        if (check_flag(&flag, "CVode", 1)) {
-            break;
-        }
-        if (flag == CV_SUCCESS) {
-            iout++;
-            tout += TSTEP;
-        }
-        out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << '\t' <<  pd->getVoltage() <<   '\n';
-        if (tout > TSTOP) {
-            break;
-        }
-    }
+        /* use RK for VCLAMP and CVode for ICLAMP */
+   while(1) {
+         if (mode == VCLAMP) {
+                 //go into voltage clamp mode
+                 e->setIapp(tout, (upper_bound+fabs(lower_bound))/2, VCLAMP);
+                 //e->setIapp(tout, 140, VCLAMP);
+                 //cout << upper_bound+fabs(lower_bound)/2 << "\n";
+         
+                 Ith(yi, 1) = e->getIapp();
+                 sc->currents(tout, yi, yd, out);
+                     //  cout << sc->getVoltage() << "\n";
+                 
+                 rk->fadvance(tout, yi, yo, yd, model, TSTEP);
+                     //cout << tout << '\t' << e->getIapp() << '\n';
+         
+             if (tout > TSTOP) {
+                 break;
+             }
+             tout+=TSTEP;
+             swap(yi, yo);
+         }
+         else {
+             e->setIapp(tout, 5.0, ICLAMP);
+             flag = cvode->fadvance(tout, t);
+             
+             if (check_flag(&flag, "CVode", 1)) {
+                 break;
+             }
+             if (flag == CV_SUCCESS) {
+                 iout++;
+                 tout += TSTEP;
+             }
+             out << tout << '\t' << e->getIapp()<< '\t' << sc->getVoltage() <<   '\n';
+             if (tout > TSTOP) {
+                 break;
+             }   
+         }
+   }
      /* free up memory */
     delete e;
-    delete ab; delete pd;
-    delete gapAB; delete gapPD;
+    delete sc; //delete ab;//delete pd;
+        //delete gapAB; delete gapPD;
     delete model;
     delete [] par_ptr;
     delete cvode;
+    delete rk;
+    
     out.close();
 }
 
@@ -195,6 +226,15 @@ int f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
     model->derivative(t, y, dy, NULL);
     return 0;   
 } 
+
+
+
+
+
+
+
+
+
 
 
 static int check_flag(void *flagvalue, char *funcname, int opt)
@@ -225,27 +265,4 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
 }
 
 
-     // while(1) {
-     //     if (mode == VCLAMP) {
-     //             //go into voltage clamp mode
-     //             //e->setIapp(tout, 16.5, VCLAMP);
-     //         e->setIapp(tout, (upper_bound+fabs(lower_bound))/2, VCLAMP);
-     //         Ith(yi, 1) = e->getIapp();
-     //         sc->currents(tout, yi, yd, out);
-     //     }
-     //     else {
-     //             //go into current clamp mode
-     //             //e->setIapp(tout, 1.8, ICLAMP);
-     //             //e->setIapp(tout, 1.35, ICLAMP);
-     //             //sc->currents(tout, yi, yd, out);
-     //         out << tout << '\t' << e->getIapp()<< '\t' << Ith(yi, 1) << '\n';
-     //     }
-     //     rk->integrate(tout, yi, yo, yd, model, TSTEP);
-     //         //cout << tout << '\t' << e->getIapp() << '\t' << TSTOP << '\n';
-         
-     //     if (tout > TSTOP) {
-     //         break;
-     //     }
-     //     tout+=TSTEP;
-     //     swap(yi, yo);
-     // }
+  
