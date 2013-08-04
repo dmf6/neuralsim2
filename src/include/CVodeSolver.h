@@ -48,6 +48,5 @@ class CVodeSolver {
         /* advance solution in time */
     int fadvance(realtype tout, realtype t);
 
-    int getDerivative(realtype t, int k, N_Vector dky);
 };
 #endif /* _CVODESOLVER_H_INCLUDED */
