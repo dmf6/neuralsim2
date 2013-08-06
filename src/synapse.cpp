@@ -2,6 +2,7 @@
 #include "synapse.h"
 
 int Synapse::idx_generator = 1;
+int Synapse::varCount=0;
 
 Synapse::Synapse(Neuron *source, Neuron *target, int type, int iniVarNo) {
     assert(target != NULL);
@@ -10,6 +11,8 @@ Synapse::Synapse(Neuron *source, Neuron *target, int type, int iniVarNo) {
     target->den.push_back(this);
     gmax = 0;
     ISyn = 0;
+    iVarNo= iniVarNo; /*number of state variables */
+    varCount+=iVarNo;
 }
 
 Synapse::~Synapse() {

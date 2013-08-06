@@ -149,7 +149,7 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     yd[k+14] = (na_minf - na_m)/na_mtau;
     yd[k+15] = (na_hinf - na_h)/na_htau;
     yd[k+16] = (proc_minf - proc_m)/0.5;
-    
+
     return (0);
 }
 

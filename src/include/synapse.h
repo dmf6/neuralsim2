@@ -8,13 +8,15 @@ class Synapse {
   protected:
     double ISyn;
     double gmax;
-  
+    double erev;
+      
   private:
     static int idx_generator;
     int idx;
     int enabled;
     
   public:
+    static int varCount;
     int type;
         /* have access to pre- and post-synaptic voltages through Neuron objects */
     Neuron *source;

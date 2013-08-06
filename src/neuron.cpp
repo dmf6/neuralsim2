@@ -10,13 +10,12 @@ Neuron::Neuron(const string name, int iniVarNo, int mode) {
     enabled= 0;
     iVarNo= iniVarNo; /*number of state variables */
     varCount+=iVarNo;
-    spiking = 0;
     this->mode = mode;
-    spikeCount = 0; /* number of spikes */
-    period = INF;
         //cout << "The index of this neuron is " << idx << "\n";
     voltage = -60;
-    
+    oldVoltage = voltage;
+    spiketime=-1;
+    oldSpiketime=-1;
 }
 
 Neuron::~Neuron() {
@@ -28,67 +27,51 @@ Neuron::~Neuron() {
 }
 
 void Neuron::init(N_Vector y, int start, double *iniVars, int n) {
-        // copy the contents of from iniVars to y
-        //cout << "start is " << start << " and number of variables is " << n << endl;
+  // copy the contents of from iniVars to y
+  //cout << "start is " << start << " and number of variables is " << n << endl;
+  
+  realtype *yi;
+  yi = NV_DATA_S(y);
+  
+  for(int i = 0; i < n; i++) {
+    //cout << idx << "\t" << i << "\t" <<  iniVars[i] << "\n";
     
-    realtype *yi;
-    yi = NV_DATA_S(y);
-    
-    for(int i = 0; i < n; i++) {
-            //cout << idx << "\t" << i << "\t" <<  iniVars[i] << "\n";
-        
-        yi[start+i] = iniVars[i];
-    }
+    yi[start+i] = iniVars[i];
+  }
 }
 
 void Neuron::setTol(N_Vector tol, int start, int n) {
-    realtype *ytol;
-    ytol = NV_DATA_S(tol);
-    
-    for(int i = 0; i < n; i++) {
-        ytol[start+i] = ATOL;
-    }
-}
-
-/* neuron class can keep track of its own spike times via a vector
- * member variable
- *
- * If we just want to measure period then we can stop the numerical
- * integration at spikeCount > 2 and output the period
- *
- * burst duration is time spent above the voltage threshold
- */
-void Neuron::detectSpike(double t, double v) {
-    if (v > SPIKE_VTHR) {
-        if (spiking == 0) {
-                /* save the time of the crossing in vector */
-            spikeTimes.push_back(t);
-            spikeCount +=1;
-            spiking = 1;
-                /* save time of start of active phase */
-            t_on = t;
-        }
-        else {
-                /* active phase has ended so save the time as t_off */
-            t_off = t;
-            spiking = 0;
-        }
-    }
-}
-
-double Neuron::getPeriod() {
-    if (spikeCount > 1) {
-        period = spikeTimes[1] - spikeTimes[0];
-    }
-        /* Neuron is constructed with an infinite period so we don't
-         * need to set it */
-    return period;
-}
-
-double Neuron::getBurstDur() {
-    return (t_off - t_on);
+  realtype *ytol;
+  ytol = NV_DATA_S(tol);
+  
+  for(int i = 0; i < n; i++) {
+    ytol[start+i] = ATOL;
+  }
 }
 
 int Neuron::getIVarNo() {
     return iVarNo;
+}
+
+void Neuron::detectSpikes(double t, N_Vector v){
+ 
+  realtype *vi;
+  vi = NV_DATA_S(v);
+  double newVoltage = vi[0];
+  if(newVoltage > oldVoltage) {
+    spiking=0;
+    increasing = 1;
+  } 
+  else if ((newVoltage < oldVoltage) && increasing) {
+    increasing = 0;
+    /* make sure we only get real spikes */
+    if ((t-oldSpiketime) > 20) { 
+      spiketime = t;
+      oldSpiketime = spiketime;
+      spiketimes.push_back(spiketime);
+      //cout << t << '\t' << newVoltage << '\n';
+      spiking = 1;
+    }
+  }
+  oldVoltage = newVoltage;
 }

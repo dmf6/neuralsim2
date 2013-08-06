@@ -20,7 +20,6 @@
 #define forall(l, it) for (it= (l).begin(); it != (l).end(); it++)
 #define Ith(v,i)    NV_Ith_S(v,i-1)       /* Ith numbers components 1..NEQ */
 #define ATOL RCONST(1.0e-14)
-#define SPIKE_VTHR -30
 #define INF 1.0e14
 
 class Synapse;
@@ -39,24 +38,21 @@ class Neuron {
     realtype rm, cm;
     int k;
     
-    
   public:
     static int varCount;
     list<Synapse *> den;       /* list of all incoming synapses and electrodes */
     list<Synapse *>::const_iterator den_it;
     vector <Electrode *> electrodes;
     vector<Electrode *>::const_iterator iapp_it;
-    vector<double> spikeTimes;
-    double voltage;
-    int iVarNo;
+    vector<double> spiketimes;
     int spiking;
-    int spikeCount;
+    double spiketime, oldSpiketime;
+    int increasing;
+    double voltage, oldVoltage;
+    int iVarNo;
     string name;
-    int m_nValue;
-    int mode;
-    double period;
-    double t_on, t_off;
     
+    int mode;
         //iniVarNo is number of state variables
     Neuron(const string name, int iniVarNo, int mode);
     virtual ~Neuron();
@@ -66,20 +62,17 @@ class Neuron {
     virtual int derivative(realtype t, N_Vector *, N_Vector *, void *user_data) = 0;
         /*use currents function to save all the currents and sum to a file using os stream */
     virtual void currents(realtype t, N_Vector, N_Vector, ostream&) = 0;
-        //virtual void detectspikes(double *time);
     inline int getIdx() { return idx;}
     virtual void init(N_Vector y, int, double *, int);
     virtual void setTol(N_Vector, int, int);
-    virtual void detectSpike(double t, double v);
-    virtual double getPeriod();
-    virtual double getBurstDur();
     int getIVarNo();
+    
     double getVoltage() {
-        return this->voltage;
+      return this->voltage;
     }
     void setVoltage(double v) {
-        this->voltage = v;
-     }
-    
+      this->voltage = v;
+    }
+    void detectSpikes(double, N_Vector);
 };
 #endif
