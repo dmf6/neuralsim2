@@ -70,7 +70,7 @@ int SimpleCell::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_d
     ca_mtau   = TAU2_CA_M+(TAU1_CA_M - TAU2_CA_M)*(1-ca_minf);
     
     ca_hinf = 1/(1+exp((v-VH_CA_H)/K_CA_H));
-    ca_htau   = TAU2_CA_H+(TAU1_CA_H - TAU2_CA_H)*(1-ca_hinf);
+    ca_htau   = TAU2_CA_H+(TAU1_CA_H - TAU2_CA_H)*(ca_hinf);
     
     Il = GL*(v-EL);
     Ih=GH*h_m*(v-EH);
