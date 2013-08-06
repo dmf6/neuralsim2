@@ -47,6 +47,7 @@ class Neuron {
     vector<double> spiketimes;
     int spiking;
     double spiketime, oldSpiketime;
+    double previousTime;
     int increasing;
     double voltage, oldVoltage;
     int iVarNo;

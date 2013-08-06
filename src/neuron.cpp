@@ -16,6 +16,7 @@ Neuron::Neuron(const string name, int iniVarNo, int mode) {
     oldVoltage = voltage;
     spiketime=-1;
     oldSpiketime=-1;
+    previousTime=-1;
 }
 
 Neuron::~Neuron() {
@@ -53,8 +54,7 @@ int Neuron::getIVarNo() {
     return iVarNo;
 }
 
-void Neuron::detectSpikes(double t, N_Vector v){
- 
+void Neuron::detectSpikes(double t, N_Vector v){ 
   realtype *vi;
   vi = NV_DATA_S(v);
   double newVoltage = vi[0];
@@ -68,10 +68,11 @@ void Neuron::detectSpikes(double t, N_Vector v){
     if ((t-oldSpiketime) > 20) { 
       spiketime = t;
       oldSpiketime = spiketime;
-      spiketimes.push_back(spiketime);
-      //cout << t << '\t' << newVoltage << '\n';
+      spiketimes.push_back(oldSpiketime);
+      cout << previousTime << '\t' << oldVoltage << '\n';
       spiking = 1;
     }
   }
   oldVoltage = newVoltage;
+  previousTime = t;
 }
