@@ -124,31 +124,31 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     icoup1 = GAXIAL*(v_a-v);
     
     if(mode == 0) {
-            yd[k+0] =  (Iapp-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0-Isyn))/CM;     
+            yd[idx+0] =  (Iapp-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0-Isyn))/CM;     
     }
     else {
-        yd[k+0] = 0;
+        yd[idx+0] = 0;
     }
 
     voltage = v;
     //cout << "AB Voltage = " << voltage << '\n';
         //cout << this->getVoltage() << "\n";
-    yd[k+1] = (h_minf - h_m)/h_mtau;
-    yd[k+2] = (a_minf - a_m)/a_mtau;
-    yd[k+3] = (a_hinf - a_h)/a_htau;
-    yd[k+4] = (kd_minf - kd_m)/kd_mtau;
-    yd[k+5] = (cat_minf-cat_m)/cat_mtau;
-    yd[k+6] = (cat_hinf-cat_h)/cat_htau;
-    yd[k+7] = (cas_minf-cas_m)/cas_mtau;
-    yd[k+8] = (-F*(ICaT+ICaS)-cai+CO)/TAUCA;
-    yd[k+9] = (kca_minf-kca_m)/kca_mtau;
-    yd[k+10] = (nap_minf-nap_m)/nap_mtau;
-    yd[k+11] = (nap_hinf-nap_h)/nap_htau;
-    yd[k+12] = (-(Ina_axon + Ik_axon + Il_axon+icoup1))/CM_AXON;
-    yd[k+13] = (k_minf - k_m)/k_mtau;
-    yd[k+14] = (na_minf - na_m)/na_mtau;
-    yd[k+15] = (na_hinf - na_h)/na_htau;
-    yd[k+16] = (proc_minf - proc_m)/0.5;
+    yd[idx+1] = (h_minf - h_m)/h_mtau;
+    yd[idx+2] = (a_minf - a_m)/a_mtau;
+    yd[idx+3] = (a_hinf - a_h)/a_htau;
+    yd[idx+4] = (kd_minf - kd_m)/kd_mtau;
+    yd[idx+5] = (cat_minf-cat_m)/cat_mtau;
+    yd[idx+6] = (cat_hinf-cat_h)/cat_htau;
+    yd[idx+7] = (cas_minf-cas_m)/cas_mtau;
+    yd[idx+8] = (-F*(ICaT+ICaS)-cai+CO)/TAUCA;
+    yd[idx+9] = (kca_minf-kca_m)/kca_mtau;
+    yd[idx+10] = (nap_minf-nap_m)/nap_mtau;
+    yd[idx+11] = (nap_hinf-nap_h)/nap_htau;
+    yd[idx+12] = (-(Ina_axon + Ik_axon + Il_axon+icoup1))/CM_AXON;
+    yd[idx+13] = (k_minf - k_m)/k_mtau;
+    yd[idx+14] = (na_minf - na_m)/na_mtau;
+    yd[idx+15] = (na_hinf - na_h)/na_htau;
+    yd[idx+16] = (proc_minf - proc_m)/0.5;
 
     return (0);
 }
