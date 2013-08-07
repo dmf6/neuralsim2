@@ -29,20 +29,39 @@ int ChemSyn::derivative(realtype t, N_Vector *y, N_Vector *ydot) {
 
   yi = NV_DATA_S(yn);
   yd = NV_DATA_S(ydn);
+  //cout << "idx of chemsyn " << idx << "\n";
+  ut = yi[idx]; xt=yi[idx+1]; yt=yi[idx+2];
+  zt = yi[idx+3];
   
-  ut = yi[k]; xt=yi[k+1]; yt=yi[k+2];
-  zt = yi[k+3];
-  
+  /* detect the maximum outside of the derivative method 
+     Once we detect a maximum, we have a discontinuity
+
+     do the following:
+     (1) Integrate up to the point of discontinuity 
+     (2) Incorporate the discontinuity
+     (3) Reinitialize the solver at the point of discontinuity 
+     (4) Integrate from the point of discontinuity 
+
+     But we need to know when the maxima or spikes occur ahead of time 
+     so we can tell the integrator when it should stop integrating...
+
+     Use 4/5 adaptive Runge-Kutta for synapse models that involve
+     discontinuities
+  */
+     
   /* del(t-t0) */
-  if(source->spiking) {
+  if(source->max) {
+    cout << "NEURON MAX DETECTED BY SYNAPSE at time: " << t << "\n";
     flag = 1;
   } else {
     flag = 0;
   }
-  yd[k] = -(ut/tauFacil) + 2*(1-ut)*flag;
-  yd[k+1] = zt/tauRec - ut*xt*flag;
-  yd[k+2] = -(yt/tauDecay) + ut*xt*flag;
-  yd[k+3] = (yt/tauDecay) - zt/tauRec;
+  yd[idx] = -(ut/tauFacil) + 0.01*(1-ut);
+  yd[idx+1] = zt/tauRec - ut*xt;
+  yd[idx+2] = -(yt/tauDecay) + ut*xt;
+  yd[idx+3] = (yt/tauDecay) - zt/tauRec;
+
+  //cout << "AT time: " << t << "\t" << ut << "\n";
   return(0);
 }
 

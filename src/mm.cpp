@@ -70,54 +70,48 @@ int main(int argc, char *argv[]) {
         }
     }
     
-        /* create neurons */
-    Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, mode);
-        //Neuron *pd = new PDNeuron("PD", par_ptr, NUM_PARS, NEQ, mode);
-    //Neuron *sc = new SimpleCell("SC", par_ptr, NUM_PARS, NEQ, mode);
+    /* create neuron and synapse objects */
+    //Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
+    //ab->setIdx(0);
+    Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
+    Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
+    resonantSyn->setIdx(0);
     
-        /*initialize the y vector using the number of state variables
-         * for each neuron */
-    int abVarNo, pdVarNo;
-    int nVars =0;
-        //pdVarNo = pd->getIVarNo();
-    abVarNo = ab->getIVarNo();
-    numVars = abVarNo;// + pdVarNo;
-     
+    /* set up y vector and tolerances */
+    numVars = NEQSYN;
+    cout << numVars <<"\n";
     yi = N_VNew_Serial(numVars);
     yo = N_VNew_Serial(numVars);
     yd = N_VNew_Serial(numVars);
     abstol = N_VNew_Serial(numVars);
     reltol = RTOL;
-    
-    ab->init(yi, nVars, PD_INIVARS, ab->getIVarNo());
-    ab->setTol(abstol, nVars, ab->getIVarNo());
-    // nVars+=abVarNo;
-    // pd->init(yi, nVars, PD_INIVARS, pdVarNo);
-    // pd->setTol(abstol, nVars, pdVarNo);
-    
-    /* add neurons to the list */
-    neurs.push_back(ab);
-    //neurs.push_back(pd);
-    //neurs.push_back(sc);
-    
-        /* create synapses and add to list */
-    // Synapse *gapAB = new Gap(ab, pd, 1, 1);
-    // gapAB->setGmax(0);
-    // Synapse *gapPD = new Gap(pd, ab, 1, 1);
-    // gapPD->setGmax(0);
 
-    // syns.push_back(gapAB);
-    // syns.push_back(gapPD);
+    /* initialize neuron and synapse state variables */
+    //ab->init(yi, PD_INIVARS);
+    //ab->setTol(abstol);
+    resonantSyn->init(yi, SYN_INIVARS);
+    resonantSyn->setTol(abstol);
+
+    /* add neurons to the list */
+    //neurs.push_back(ab);
+    neurs.push_back(sc);
+    /* add synapses to the list */
+    syns.push_back(resonantSyn);
+
+        /* create synapses and add to list */
+    /* Synapse *gapAB = new Gap(ab, pd, 1, 1);
+       gapAB->setGmax(0);
+       Synapse *gapPD = new Gap(pd, ab, 1, 1);
+       gapPD->setGmax(0);
+       syns.push_back(gapAB);
+       syns.push_back(gapPD); 
+    */
    
-        /* create electrode */
-    Electrode *e = new Electrode(ab, 0.0);
-    // e->setWaveform(PULSE);
-    // e->setStart(1000);
-    // e->setDuration(2000);
-    // e->setBias(-65);
-    //e->setWaveform(ZAP);
-    //e->setDuration(TSTOP);
-    //e->setBias(-60);
+        /* create electrode to drive sc neuron membrane potential with ZAP*/
+    Electrode *e = new Electrode(sc, 0.0);
+    e->setWaveform(ZAP);
+    e->setDuration(TSTOP);
+    e->setBias(-60);
     
     /* switch on numerical method given in command-line arguments */
     NeuronModel *model = new NeuronModel(&neurs, &syns, numVars, os);
@@ -126,6 +120,7 @@ int main(int argc, char *argv[]) {
     RhsFn myfunc =&f;
     /*myfunc is the function to be solved by CVode */
     CVodeSolver *cvode = new CVodeSolver(numVars, yi, abstol, model, myfunc);
+    cvode->setStopTime(TSTOP);
  
         /* class for RK fadvance */
     RK *rk = new RK(numVars, 2);
@@ -175,7 +170,8 @@ int main(int argc, char *argv[]) {
 	swap(yi, yo);
       }
       else {
-	//	e->setIapp(tout, 5.0, ICLAMP);
+	
+	e->setIapp(tout, 15, VCLAMP);//(upper_bound+fabs(lower_bound))/2, VCLAMP);
 	flag = cvode->fadvance(tout, t);
 
 	if (check_flag(&flag, "CVode", 1)) {
@@ -184,9 +180,10 @@ int main(int argc, char *argv[]) {
 	if (flag == CV_SUCCESS) {
 	  iout++;
 	  tout += TSTEP;
-	  ab->detectSpikes(tout, yi);
 	}
-	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() <<   '\n';
+	sc->clampVoltage(tout, yi, NULL, out);
+	cout << "MAX: " << sc->detectMaximum(tout) << "\n";
+	out << tout << '\t' << e->getIapp()<< '\t' << sc->getVoltage() <<   '\n';
 	if (tout > TSTOP) {
 	  break;
 	}   
@@ -195,8 +192,8 @@ int main(int argc, char *argv[]) {
     
     /* free up memory */
     delete e;
-    //delete sc; //delete ab;//delete pd;
-    //delete gapAB; delete gapPD;
+    delete sc; //delete ab;//delete pd;
+    delete resonantSyn;//delete gapAB; delete gapPD;
     delete model;
     delete [] par_ptr;
     delete cvode;

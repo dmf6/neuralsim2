@@ -27,26 +27,26 @@ Neuron::~Neuron() {
     }
 }
 
-void Neuron::init(N_Vector y, int start, double *iniVars, int n) {
+void Neuron::init(N_Vector y, double *iniVars) {
   // copy the contents of from iniVars to y
   //cout << "start is " << start << " and number of variables is " << n << endl;
   
   realtype *yi;
   yi = NV_DATA_S(y);
   
-  for(int i = 0; i < n; i++) {
+  for(int i = 0; i < iVarNo; i++) {
     //cout << idx << "\t" << i << "\t" <<  iniVars[i] << "\n";
     
-    yi[start+i] = iniVars[i];
+    yi[idx+i] = iniVars[i];
   }
 }
 
-void Neuron::setTol(N_Vector tol, int start, int n) {
+void Neuron::setTol(N_Vector tol) {
   realtype *ytol;
   ytol = NV_DATA_S(tol);
   
-  for(int i = 0; i < n; i++) {
-    ytol[start+i] = ATOL;
+  for(int i = 0; i < iVarNo; i++) {
+    ytol[idx+i] = ATOL;
   }
 }
 
@@ -75,4 +75,31 @@ void Neuron::detectSpikes(double t, N_Vector v){
   }
   oldVoltage = newVoltage;
   previousTime = t;
+}
+
+int Neuron::detectMaximum(double t){ 
+  double newVoltage = voltage;
+  if(newVoltage > oldVoltage) {
+    max=0;
+    increasing = 1;
+  } 
+  else if ((newVoltage < oldVoltage) && increasing) {
+    increasing = 0;
+    max = 1;
+    //cout << t << "\t" << -30 << "\n";
+  }
+  oldVoltage = newVoltage;
+  previousTime = t;
+  return max;
+}
+
+void Neuron::clampVoltage(realtype  t, N_Vector y, N_Vector ydot, ostream& out) {
+  realtype Iext;
+  Iext = 0;    
+  for ( iapp_it = electrodes.begin();  iapp_it != electrodes.end(); ++iapp_it) {
+    Iext += (*iapp_it)->getIapp();
+  }
+  
+  voltage = Iext;
+  //cout << "Membrane potential at time: " << t << " is clamped to " << Iext << "\n";
 }

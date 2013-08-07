@@ -52,7 +52,7 @@ class Neuron {
     double voltage, oldVoltage;
     int iVarNo;
     string name;
-    
+    int max;
     int mode;
         //iniVarNo is number of state variables
     Neuron(const string name, int iniVarNo, int mode);
@@ -64,8 +64,9 @@ class Neuron {
         /*use currents function to save all the currents and sum to a file using os stream */
     virtual void currents(realtype t, N_Vector, N_Vector, ostream&) = 0;
     inline int getIdx() { return idx;}
-    virtual void init(N_Vector y, int, double *, int);
-    virtual void setTol(N_Vector, int, int);
+    inline void setIdx(int n) { idx = n; }
+    virtual void init(N_Vector, double *iniVars);
+    virtual void setTol(N_Vector);
     int getIVarNo();
     
     double getVoltage() {
@@ -75,5 +76,7 @@ class Neuron {
       this->voltage = v;
     }
     void detectSpikes(double, N_Vector);
+    int detectMaximum(double t);
+    void clampVoltage(realtype, N_Vector, N_Vector, ostream&);
 };
 #endif

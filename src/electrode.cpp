@@ -36,7 +36,7 @@ void Electrode::setIapp(realtype t, realtype amp, int mode)  {
                 current = bias + amp+amp*sin(2*PI*freq/1000*t + 3*(PI/2));
             }
                 /* for current clamp mode */
-            else {
+            else {  
                 current =  bias +amp*sin(2*PI*freq*t/1000 + 3*(PI/2));
             }
             break;

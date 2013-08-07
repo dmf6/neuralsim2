@@ -43,7 +43,7 @@ int SimpleCell::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_d
     yi = NV_DATA_S(yn);
     yd = NV_DATA_S(ydn);
 
-    v = yi[0]; h_m = yi[1]; ca_m = yi[2]; ca_h = yi[3];
+    v = yi[idx]; h_m = yi[idx+1]; ca_m = yi[idx+2]; ca_h = yi[idx+3];
    
     // if (v > V_THR && flag == 0) {
     //     flag = 1;
@@ -107,7 +107,6 @@ int SimpleCell::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_d
         yd[0] = (Iext-(Il + Ih + ICa + iaxial_s))/CM;
         yd[4] = (-(Ina_axon + Ik_axon + Il_axon + iaxial_a))/CM_AXON;
     }
-    
     
     yd[1] = (h_minf - h_m)/h_mtau;
     yd[2] = (ca_minf - ca_m)/ca_mtau;

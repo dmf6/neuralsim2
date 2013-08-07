@@ -30,6 +30,14 @@ int CVodeSolver::f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
 } 
 
 /* make the call to perform the integration of the IVP */
+/* 
+   flag = CVode(cvode mem, tout, yout, &tret, itask);
+   itask can be either CV_NORMAL or CV_ONE_STEP 
+*/
 int CVodeSolver::fadvance(realtype tout, realtype t) {
     return CVode(cvode_mem, tout, yi, &t, CV_NORMAL);
+}
+
+int CVodeSolver::setStopTime(realtype t) {
+  return CVodeSetStopTime(cvode_mem, t);
 }

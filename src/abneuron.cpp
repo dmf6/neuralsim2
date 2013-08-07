@@ -10,7 +10,6 @@ ABNeuron::ABNeuron(const string name=NULL, double *inp=NULL, int inpno=0, int in
     strcpy (outfile, name.c_str());
     strcat (outfile,".asc");
     out.open(outfile);
-    k = varCount - iVarNo;
     cout << varCount << "\t" << idx << "\t" << iVarNo << "\t" << k<< endl;
 }
 
@@ -36,11 +35,11 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     realtype *yi, *yd;
     
         /* sum current from all incoming synapses */
-    Isyn= 0.0;
-    for (den_it = den.begin(); den_it != den.end(); ++den_it) {
-        Isyn += (*den_it)->getISyn();
-    }
-        //cout << Isyn << "\n";
+    // Isyn= 0.0;
+    // for (den_it = den.begin(); den_it != den.end(); ++den_it) {
+    //     Isyn += (*den_it)->getISyn();
+    // }
+    //cout << "Synaptic current is " <<Isyn << "\n";
     
     Iapp = 0.0;
     for ( iapp_it = electrodes.begin();  iapp_it != electrodes.end(); ++iapp_it) {
@@ -53,11 +52,11 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     yi = NV_DATA_S(yn);
     yd = NV_DATA_S(ydn);
 
-        //cout << "voltage index is " << k << "\n";
+    //cout << "voltage index is " << v << "\n";
     
-    v = yi[k]; h_m=yi[k+1]; a_m = yi[k+2]; a_h = yi[k+3]; kd_m = yi[k+4]; cat_m = yi[k+5]; cat_h = yi[k+6];
-    cas_m = yi[k+7]; cai = yi[k+8]; kca_m = yi[k+9]; nap_m = yi[k+10]; nap_h = yi[k+11]; v_a = yi[k+12]; k_m = yi[k+13];
-    na_m=yi[k+14]; na_h=yi[k+15]; proc_m=yi[k+16];
+    v = yi[idx]; h_m=yi[idx+1]; a_m = yi[idx+2]; a_h = yi[idx+3]; kd_m = yi[idx+4]; cat_m = yi[idx+5]; cat_h = yi[idx+6];
+    cas_m = yi[idx+7]; cai = yi[idx+8]; kca_m = yi[idx+9]; nap_m = yi[idx+10]; nap_h = yi[idx+11]; v_a = yi[idx+12]; k_m = yi[idx+13];
+    na_m=yi[idx+14]; na_h=yi[idx+15]; proc_m=yi[idx+16];
     
         /*compute calcium reversal potential using Nernst equation  (RT/zF)*(ln(cao/cai))*/
         //2.303*(RT/zF)*(cao/cai)*1000
@@ -131,7 +130,8 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
         yd[k+0] = 0;
     }
 
-    this->setVoltage(v);
+    voltage = v;
+    //cout << "AB Voltage = " << voltage << '\n';
         //cout << this->getVoltage() << "\n";
     yd[k+1] = (h_minf - h_m)/h_mtau;
     yd[k+2] = (a_minf - a_m)/a_mtau;

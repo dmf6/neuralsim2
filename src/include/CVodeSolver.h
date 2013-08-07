@@ -48,5 +48,6 @@ class CVodeSolver {
         /* advance solution in time */
     int fadvance(realtype tout, realtype t);
 
+    int setStopTime(realtype t);
 };
 #endif /* _CVODESOLVER_H_INCLUDED */

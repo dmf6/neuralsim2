@@ -45,6 +45,7 @@ class SimpleCell2: public Neuron {
     void set_p(double *);
     int derivative(realtype , N_Vector *, N_Vector *, void *);
     void currents(realtype, N_Vector, N_Vector, ostream&);
+   
 };
 
 #endif

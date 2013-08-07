@@ -9,10 +9,10 @@ class Synapse {
     double ISyn;
     double gmax;
     double erev;
-      
+    int idx;
+    
   private:
     static int idx_generator;
-    int idx;
     int enabled;
     
   public:
@@ -28,8 +28,8 @@ class Synapse {
     virtual void setISyn() = 0;
     virtual ~Synapse();
     
-    virtual void setIdx(int);
     int getIdx();
+    void setIdx(int);
     virtual void setGmax(double gmax)=0;
         // for a depressing/facilitating synapse defined a derivative
         // vector to be passed to the integrator setting a virtual
@@ -37,6 +37,8 @@ class Synapse {
         // said function) in order to use it. It's like a base interface class
     virtual int derivative(realtype, N_Vector *, N_Vector *)=0;
     virtual double getISyn()=0;
+    void init(N_Vector y, double *iniVars);
+    void setTol(N_Vector tol);
 };
 
 #endif/* _SYNAPSE_H_INCLUDED_*/

@@ -57,9 +57,9 @@ int PDNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     yd = NV_DATA_S(ydn);
    
     // cout << "voltage index is " << k << "\n";
-    v = yi[k]; h_m=yi[k+1]; a_m = yi[k+2]; a_h = yi[k+3]; kd_m = yi[k+4]; cat_m = yi[k+5]; cat_h = yi[k+6];
-    cas_m = yi[k+7]; cai = yi[k+8]; kca_m = yi[k+9]; nap_m = yi[k+10]; nap_h = yi[k+11]; v_a = yi[k+12]; k_m = yi[k+13];
-    na_m=yi[k+14]; na_h=yi[k+15]; proc_m=yi[k+16];
+    v = yi[k]; h_m=yi[idx+1]; a_m = yi[idx+2]; a_h = yi[idx+3]; kd_m = yi[idx+4]; cat_m = yi[idx+5]; cat_h = yi[idx+6];
+    cas_m = yi[idx+7]; cai = yi[idx+8]; kca_m = yi[idx+9]; nap_m = yi[idx+10]; nap_h = yi[idx+11]; v_a = yi[idx+12]; k_m = yi[idx+13];
+    na_m=yi[idx+14]; na_h=yi[idx+15]; proc_m=yi[idx+16];
     
         /*compute calcium reversal potential using Nernst equation  (RT/zF)*(ln(cao/cai))*/
         //2.303*(RT/zF)*(cao/cai)*1000
@@ -136,29 +136,29 @@ int PDNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     icoup1 = 1.05*(v_a-v);
     
     if(mode == 0) {
-            yd[k+0] =  (Iapp-(Ih + Il + Ikd +Ia + INaP +ICaS + ICaT+ IKCa+icoup0+Isyn))/CM;     
+            yd[idx+0] =  (Iapp-(Ih + Il + Ikd +Ia + INaP +ICaS + ICaT+ IKCa+icoup0+Isyn))/CM;     
     }
     else {
-        yd[k+0] = 0;
+        yd[idx+0] = 0;
     }
 
     this->setVoltage(v);
-    yd[k+1] = (h_minf - h_m)/h_mtau;
-    yd[k+2] = (a_minf - a_m)/a_mtau;
-    yd[k+3] = (a_hinf - a_h)/a_htau;
-    yd[k+4] = (kd_minf - kd_m)/kd_mtau;
-    yd[k+5] = (cat_minf-cat_m)/cat_mtau;
-    yd[k+6] = (cat_hinf-cat_h)/cat_htau;
-    yd[k+7] = (cas_minf-cas_m)/cas_mtau;
-    yd[k+8] = (-F*(ICaT+ICaS)-cai+CO)/TAUCA;
-    yd[k+9] = (kca_minf-kca_m)/kca_mtau;
-    yd[k+10] = (nap_minf-nap_m)/nap_mtau;
-    yd[k+11] = (nap_hinf-nap_h)/nap_htau;
-    yd[k+12] = (-(Ina_axon + Ik_axon + Il_axon+icoup1))/CM_AXON;
-    yd[k+13] = (k_minf - k_m)/k_mtau;
-    yd[k+14] = (na_minf - na_m)/na_mtau;
-    yd[k+15] = (na_hinf - na_h)/na_htau;
-    yd[k+16] = (proc_minf - proc_m)/0.5;
+    yd[idx+1] = (h_minf - h_m)/h_mtau;
+    yd[idx+2] = (a_minf - a_m)/a_mtau;
+    yd[idx+3] = (a_hinf - a_h)/a_htau;
+    yd[idx+4] = (kd_minf - kd_m)/kd_mtau;
+    yd[idx+5] = (cat_minf-cat_m)/cat_mtau;
+    yd[idx+6] = (cat_hinf-cat_h)/cat_htau;
+    yd[idx+7] = (cas_minf-cas_m)/cas_mtau;
+    yd[idx+8] = (-F*(ICaT+ICaS)-cai+CO)/TAUCA;
+    yd[idx+9] = (kca_minf-kca_m)/kca_mtau;
+    yd[idx+10] = (nap_minf-nap_m)/nap_mtau;
+    yd[idx+11] = (nap_hinf-nap_h)/nap_htau;
+    yd[idx+12] = (-(Ina_axon + Ik_axon + Il_axon+icoup1))/CM_AXON;
+    yd[idx+13] = (k_minf - k_m)/k_mtau;
+    yd[idx+14] = (na_minf - na_m)/na_mtau;
+    yd[idx+15] = (na_hinf - na_h)/na_htau;
+    yd[idx+16] = (proc_minf - proc_m)/0.5;
         //out << t  <<  "\t" << v << "\t" << v_a << "\n";
     return (0);
 }
@@ -171,9 +171,9 @@ void PDNeuron::currents(realtype  t, N_Vector y, N_Vector ydot, ostream& out) {
     double Ih, Il, Ia, Ikd, ICaT, ICaS, IKCa, INaP, Ik_axon, Il_axon, Ina_axon, icoup0, icoup1, isum_soma;
     double eca;
 
-    v = yi[k+0]; h_m=yi[k+1]; a_m = yi[k+2]; a_h = yi[k+3]; kd_m = yi[k+4]; cat_m = yi[k+5]; cat_h = yi[k+6];
-    cas_m = yi[k+7]; cai = yi[k+8]; kca_m = yi[k+9]; nap_m = yi[k+10]; nap_h = yi[k+11]; v_a = yi[k+12]; k_m = yi[k+13];
-    na_m=yi[k+14]; na_h=yi[k+15];
+    v = yi[idx+0]; h_m=yi[idx+1]; a_m = yi[idx+2]; a_h = yi[idx+3]; kd_m = yi[idx+4]; cat_m = yi[idx+5]; cat_h = yi[idx+6];
+    cas_m = yi[idx+7]; cai = yi[idx+8]; kca_m = yi[idx+9]; nap_m = yi[idx+10]; nap_h = yi[idx+11]; v_a = yi[idx+12]; k_m = yi[idx+13];
+    na_m=yi[idx+14]; na_h=yi[idx+15];
     
     eca = 29.0*(log(CAO/cai)/log(10));
 
