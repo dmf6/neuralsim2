@@ -42,9 +42,6 @@ class CVodeSolver {
         /* Deallocate memory for solution vector */
     ~CVodeSolver();
     
-        /* function to be solved in time */
-    int f(realtype t, N_Vector y, N_Vector dy, void *user_data);
-    
         /* advance solution in time */
     int fadvance(realtype tout, realtype t);
 

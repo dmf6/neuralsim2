@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
     double upper_bound, lower_bound;
     realtype t, tout, reltol;
     N_Vector yi, yo, yd, abstol;
+    int solver;
     int flag, iout;
     int numVars;
     ofstream os;
@@ -71,14 +72,14 @@ int main(int argc, char *argv[]) {
     }
     
     /* create neuron and synapse objects */
-    //Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
-    //ab->setIdx(0);
-    Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
-    Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
-    resonantSyn->setIdx(0);
+    Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
+    ab->setIdx(0);
+    //Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
+    //Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
+    //resonantSyn->setIdx(0);
     
     /* set up y vector and tolerances */
-    numVars = NEQSYN;
+    numVars = NEQ;
     cout << numVars <<"\n";
     yi = N_VNew_Serial(numVars);
     yo = N_VNew_Serial(numVars);
@@ -87,16 +88,16 @@ int main(int argc, char *argv[]) {
     reltol = RTOL;
 
     /* initialize neuron and synapse state variables */
-    //ab->init(yi, PD_INIVARS);
-    //ab->setTol(abstol);
-    resonantSyn->init(yi, SYN_INIVARS);
-    resonantSyn->setTol(abstol);
+    ab->init(yi, PD_INIVARS);
+    ab->setTol(abstol);
+    //resonantSyn->init(yi, SYN_INIVARS);
+    //resonantSyn->setTol(abstol);
 
     /* add neurons to the list */
-    //neurs.push_back(ab);
-    neurs.push_back(sc);
+    neurs.push_back(ab);
+    //neurs.push_back(sc);
     /* add synapses to the list */
-    syns.push_back(resonantSyn);
+    //syns.push_back(resonantSyn);
 
         /* create synapses and add to list */
     /* Synapse *gapAB = new Gap(ab, pd, 1, 1);
@@ -108,10 +109,10 @@ int main(int argc, char *argv[]) {
     */
    
         /* create electrode to drive sc neuron membrane potential with ZAP*/
-    Electrode *e = new Electrode(sc, 0.0);
-    e->setWaveform(ZAP);
-    e->setDuration(TSTOP);
-    e->setBias(-60);
+    Electrode *e = new Electrode(ab, 0.0);
+    //e->setWaveform(ZAP);
+    //e->setDuration(TSTOP);
+    //e->setBias(-60);
     
     /* switch on numerical method given in command-line arguments */
     NeuronModel *model = new NeuronModel(&neurs, &syns, numVars, os);
@@ -124,7 +125,15 @@ int main(int argc, char *argv[]) {
  
         /* class for RK fadvance */
     RK *rk = new RK(numVars, 2);
- 
+
+    double rk65_MINDT= 0.05;
+    double rk65_eps= 1e-12;
+    double rk65_relEps= 1e-9;
+    double rk65_absEps= 1e-16;
+    //double mindt=1e-6;
+    
+    RK65n machine(numVars, rk65_MINDT, rk65_eps, rk65_absEps, rk65_relEps);
+    
         /* append thread id to output file name */
     string filename = "SC";
     filename += id;
@@ -147,33 +156,30 @@ int main(int argc, char *argv[]) {
      *
      ******************************************************************/  
     iout = 0;  tout = T1;
+    double dt= 0.0001;
+    double dtx= 0.005;
+
+    /* set solver to either CVODE or RK65 If we need to handle
+       spike-mediated events in synaptic mechanisms then RK65 is the
+       choice 
+    */
     
-    /* use RK for VCLAMP and CVode for ICLAMP */
+    solver = RK65;
     while(1) {
-      if (mode == VCLAMP) {
-	//go into voltage clamp mode
-	//e->setIapp(tout, (upper_bound+fabs(lower_bound))/2, VCLAMP);
-	//e->setIapp(tout, 140, VCLAMP);
-	//cout << upper_bound+fabs(lower_bound)/2 << "\n";
-        
-	//Ith(yi, 1) = e->getIapp();
-	//sc->currents(tout, yi, yd, out);
-	//  cout << sc->getVoltage() << "\n";
-        
-	rk->fadvance(tout, yi, yo, yd, model, TSTEP);
-	//cout << tout << '\t' << e->getIapp() << '\n';
-        
+      if (solver == RK65) {
+	dtx= machine.integrate(tout, yi, yo, model, dt);
+	dtx= min(dtx, 2.0*dt);
+	swap(yi, yo);
+	dt= dtx;
+	tout+=dt; 
 	if (tout > TSTOP) {
 	  break;
 	}
-	tout+=TSTEP;
-	swap(yi, yo);
+	//sc->clampVoltage(tout, yi, NULL, out);
+	//cout << "MAX: " << sc->detectMaximum(tout) << "\n";
       }
-      else {
-	
-	e->setIapp(tout, 15, VCLAMP);//(upper_bound+fabs(lower_bound))/2, VCLAMP);
+      else if (solver == CVODE) {
 	flag = cvode->fadvance(tout, t);
-
 	if (check_flag(&flag, "CVode", 1)) {
 	  break;
 	}
@@ -181,9 +187,7 @@ int main(int argc, char *argv[]) {
 	  iout++;
 	  tout += TSTEP;
 	}
-	sc->clampVoltage(tout, yi, NULL, out);
-	cout << "MAX: " << sc->detectMaximum(tout) << "\n";
-	out << tout << '\t' << e->getIapp()<< '\t' << sc->getVoltage() <<   '\n';
+	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() <<   '\n';
 	if (tout > TSTOP) {
 	  break;
 	}   
@@ -192,21 +196,18 @@ int main(int argc, char *argv[]) {
     
     /* free up memory */
     delete e;
-    delete sc; //delete ab;//delete pd;
-    delete resonantSyn;//delete gapAB; delete gapPD;
+    delete ab;
     delete model;
     delete [] par_ptr;
     delete cvode;
-    delete rk;
+    delete rk, machine;
     out.close();
 }
 
 void swap(N_Vector y, N_Vector yout) {
     realtype *yi, *yo;
-   
     yi = NV_DATA_S(y);
     yo = NV_DATA_S(yout);
-    
     for (int i = 0; i < NEQ; i++) {
         yi[i] = yo[i];
     }
@@ -246,13 +247,15 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
     if (*errflag < 0) {
       fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
 	      funcname, *errflag);
-      return(1); }}
+      return(1); }
+  }
 
   /* Check if function returned NULL pointer - no memory allocated */
   else if (opt == 2 && flagvalue == NULL) {
     fprintf(stderr, "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
 	    funcname);
-    return(1); }
+    return(1); 
+  }
 
   return(0);
 }

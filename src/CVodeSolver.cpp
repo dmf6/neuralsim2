@@ -22,13 +22,6 @@ CVodeSolver::~CVodeSolver() {
    CVodeFree(&cvode_mem);
 }
 
-int CVodeSolver::f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
-        /* for multiple cells cast user_data to NeuronModel */
-    NeuronModel *model = static_cast<NeuronModel *>(user_data);
-    model->derivative(t, y, dy, NULL);
-    return 0;   
-} 
-
 /* make the call to perform the integration of the IVP */
 /* 
    flag = CVode(cvode mem, tout, yout, &tret, itask);

@@ -23,7 +23,7 @@ class NeuronModel
     int iVarCnt;
     NeuronModel(list<Neuron *> *, list<Synapse *> *,
                 int &, ostream &); 
-        //virtual ~NeuronModel();
+    ~NeuronModel(){}
         /* loops over neuron and synapse objects in the list so that
          * RK4 can solve each one at time t */
     

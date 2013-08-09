@@ -1,11 +1,12 @@
 #ifndef _MM_H_INCLUDED_
 #define _MM_H_INCLUDED_
 
+#include "rk65n.h"
 #include "neuron.h"
 #include "synapse.h"
 #include "electrode.h"
 #include "chemsyn.h"
-#include "simplecell2.h"
+//#include "simplecell2.h"
 //#include "hh.h"
 //#include "pdneuron.h"
 #include "abneuron.h"
@@ -13,6 +14,7 @@
 #include "neuronmodel.h"
 #include "CVodeSolver.h"
 #include "rk.h"
+
 
 
 int f(realtype t, N_Vector y, N_Vector dy, void* user_data);
@@ -49,7 +51,7 @@ double SYN_INIVARS[NEQSYN] = {100.0, 100.0, 100.0, 100.0};
 #define ZAP 1
 #define PULSE 2
 #define SINE 3
-#define RK24 4
+#define RK65 4
 #define CVODE 5
 
 /*Function f(t, y) should be defined in this manner */
