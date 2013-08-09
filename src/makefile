@@ -14,7 +14,7 @@ OBJDIR = ./obj
 INCLUDE_DIR = ./include
 INCLUDES  := $(addprefix -I,$(INCLUDE_DIR))
 
-objects = $(addprefix $(OBJDIR)/, electrode.o mm.o neuron.o neuronmodel.o rk.o synapse.o simplecell.o random.o abneuron.o gap.o CVodeSolver.o chemsyn.o rk65n.o)
+objects = $(addprefix $(OBJDIR)/, electrode.o mm.o neuron.o neuronmodel.o rk.o synapse.o simplecell.o simplecell2.o random.o abneuron.o gap.o CVodeSolver.o chemsyn.o rk65n.o)
 
 MY_APPS = neuralsim
 

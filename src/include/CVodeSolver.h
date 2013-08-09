@@ -15,6 +15,8 @@
 
 /* definition of the function to be passed to CVodeSolver */
 typedef int (*RhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data);
+typedef int (*gFn)(realtype t, N_Vector y, realtype *gout, void *user_data);
+
 
 class NeuronModel;
 
@@ -24,7 +26,7 @@ class CVodeSolver {
     realtype reltol;
     void *cvode_mem;
     RhsFn rhsFn;
-    
+    gFn rootFn;
   public:
     
 /*pass in y, ydot, yout, and abstol vectors to constructor */
@@ -46,5 +48,9 @@ class CVodeSolver {
     int fadvance(realtype tout, realtype t);
 
     int setStopTime(realtype t);
+
+    int rootInit(int, gFn);
+
+    int getRootInfo(int *);
 };
 #endif /* _CVODESOLVER_H_INCLUDED */

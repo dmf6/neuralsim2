@@ -6,7 +6,7 @@
 #include "synapse.h"
 #include "electrode.h"
 #include "chemsyn.h"
-//#include "simplecell2.h"
+#include "simplecell2.h"
 //#include "hh.h"
 //#include "pdneuron.h"
 #include "abneuron.h"
@@ -18,6 +18,8 @@
 
 
 int f(realtype t, N_Vector y, N_Vector dy, void* user_data);
+static int g(realtype t, N_Vector y, realtype *gout, void *user_data);
+
 void swap(N_Vector y, N_Vector yout);
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
@@ -33,7 +35,7 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
                                          // integer multiple number of
                                          // cycles
 #define T0 0.095367432            /* start time */
-#define TSTOP 100000  /* duration */
+#define TSTOP 6000  /* duration */
 
 #define NUM_PARS 15 /* number of parameters */
 
@@ -53,9 +55,6 @@ double SYN_INIVARS[NEQSYN] = {100.0, 100.0, 100.0, 100.0};
 #define SINE 3
 #define RK65 4
 #define CVODE 5
-
-/*Function f(t, y) should be defined in this manner */
-typedef int (*RhsFn)(realtype t, N_Vector y, N_Vector ydot, void *user_data);
 
 #define T1    RCONST(1.0)      /* first output time      */
 #define RTOL  RCONST(1.0e-8)   /* scalar relative tolerance            */

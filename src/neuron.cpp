@@ -82,11 +82,13 @@ int Neuron::detectMaximum(double t){
   if(newVoltage > oldVoltage) {
     max=0;
     increasing = 1;
-  } 
+    // cout << "NO SPIKE\n";
+  }
   else if ((newVoltage < oldVoltage) && increasing) {
     increasing = 0;
     max = 1;
-    //cout << t << "\t" << -30 << "\n";
+    // cout << "SPIKE\n";
+    // cout << t << "\t" << -30 << "\n";
   }
   oldVoltage = newVoltage;
   previousTime = t;

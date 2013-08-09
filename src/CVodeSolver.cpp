@@ -34,3 +34,11 @@ int CVodeSolver::fadvance(realtype tout, realtype t) {
 int CVodeSolver::setStopTime(realtype t) {
   return CVodeSetStopTime(cvode_mem, t);
 }
+
+int CVodeSolver::rootInit(int n, gFn g) {
+  return CVodeRootInit(cvode_mem, n, g);
+}
+
+int CVodeSolver::getRootInfo(int *rootsfound) {
+  return CVodeGetRootInfo(cvode_mem, rootsfound);
+}

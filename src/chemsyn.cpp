@@ -48,17 +48,18 @@ int ChemSyn::derivative(realtype t, N_Vector *y, N_Vector *ydot) {
      Use 4/5 adaptive Runge-Kutta for synapse models that involve
      discontinuities
   */
-     
+   cout  << t << "\t" << source->max << "\n";
   /* del(t-t0) */
   if(source->max) {
-    cout << "NEURON MAX DETECTED BY SYNAPSE at time: " << t << "\n";
+   
     flag = 1;
   } else {
     flag = 0;
   }
-  yd[idx] = -(ut/tauFacil) + 0.01*(1-ut);
-  yd[idx+1] = zt/tauRec - ut*xt;
-  yd[idx+2] = -(yt/tauDecay) + ut*xt;
+  // cout << "flag = " << flag << "\n";
+  yd[idx] = -(ut/tauFacil) + 0.01*(1-ut)*flag;
+  yd[idx+1] = zt/tauRec - ut*xt*flag;
+  yd[idx+2] = -(yt/tauDecay) + ut*xt*flag;
   yd[idx+3] = (yt/tauDecay) - zt/tauRec;
 
   //cout << "AT time: " << t << "\t" << ut << "\n";
