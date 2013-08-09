@@ -175,6 +175,7 @@ int main(int argc, char *argv[]) {
 	if (tout > TSTOP) {
 	  break;
 	}
+	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() <<   '\n';
 	//sc->clampVoltage(tout, yi, NULL, out);
 	//cout << "MAX: " << sc->detectMaximum(tout) << "\n";
       }
