@@ -3,15 +3,10 @@
 #include <cstdlib>
 #include <math.h>
 #include <stdio.h>
-//#include <ostream>
-//#include <boost/iostreams/device/file.hpp>
-//#include <boost/iostreams/stream.hpp>
-//#include <boost/foreach.hpp>
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include "mm.h"
-//#define foreach_         BOOST_FOREACH
 
 using namespace std;
 
@@ -27,9 +22,7 @@ static void show_usage(string name) {
 
 int main(int argc, char *argv[]) {
         /* parse command line arguments to extract parameters */
-    program_name = argv[0];
-        /* pass this array to the PD constructor once filled with command-line arguments */
-  
+    program_name = argv[0];  
     string id;
     double upper_bound, lower_bound;
     realtype t, tout, reltol;
@@ -40,9 +33,6 @@ int main(int argc, char *argv[]) {
     ofstream os;
     list<Neuron *> neurs;
     list<Synapse *> syns;
-        /* set solver to either RK or CVODE */
-
-
     int mode = ICLAMP;
     double *par_ptr = new double[NUM_PARS];
          
@@ -74,9 +64,6 @@ int main(int argc, char *argv[]) {
     /* create neuron and synapse objects */
     Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
     ab->setIdx(0);
-    //Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
-    //Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
-    //resonantSyn->setIdx(0);
     
     /* set up y vector and tolerances */
     numVars = NEQ;
@@ -90,24 +77,10 @@ int main(int argc, char *argv[]) {
     /* initialize neuron and synapse state variables */
     ab->init(yi, PD_INIVARS);
     ab->setTol(abstol);
-    //resonantSyn->init(yi, SYN_INIVARS);
-    //resonantSyn->setTol(abstol);
 
     /* add neurons to the list */
     neurs.push_back(ab);
-    //neurs.push_back(sc);
-    /* add synapses to the list */
-    //syns.push_back(resonantSyn);
 
-        /* create synapses and add to list */
-    /* Synapse *gapAB = new Gap(ab, pd, 1, 1);
-       gapAB->setGmax(0);
-       Synapse *gapPD = new Gap(pd, ab, 1, 1);
-       gapPD->setGmax(0);
-       syns.push_back(gapAB);
-       syns.push_back(gapPD); 
-    */
-   
         /* create electrode to drive sc neuron membrane potential with ZAP*/
     Electrode *e = new Electrode(ab, 0.0);
     //e->setWaveform(ZAP);
@@ -155,7 +128,7 @@ int main(int argc, char *argv[]) {
      *                     start CVode loop (only use for current clamp)
      *
      ******************************************************************/  
-    iout = 0;  tout = T1;
+    tout = T1;
     double dt= 0.0001;
     double dtx= 0.005;
 
@@ -184,7 +157,6 @@ int main(int argc, char *argv[]) {
 	  break;
 	}
 	if (flag == CV_SUCCESS) {
-	  iout++;
 	  tout += TSTEP;
 	}
 	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() <<   '\n';
@@ -220,16 +192,6 @@ int f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
     model->derivative(t, y, dy, NULL);
     return 0;   
 } 
-
-
-
-
-
-
-
-
-
-
 
 static int check_flag(void *flagvalue, char *funcname, int opt)
 {
