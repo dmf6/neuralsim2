@@ -42,3 +42,16 @@ int CVodeSolver::rootInit(int n, gFn g) {
 int CVodeSolver::getRootInfo(int *rootsfound) {
   return CVodeGetRootInfo(cvode_mem, rootsfound);
 }
+
+int CVodeSolver::reinit(realtype t1) {
+        /*An optional function CVodeGetDky is available to obtain
+          additional output values. This function should only be called after a
+          successful return from CVode as it provides interpolated values either
+          of y or of its derivatives (up to the current order of the integration
+          method) interpolated to any value of t in the last internal step taken
+          by cvode.
+        */
+        //int flag;
+        //flag = CVodeGetDky(cvode_mem, t1, 0, yi);
+    return CVodeReInit(cvode_mem, t1, yi); 
+}

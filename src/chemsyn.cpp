@@ -30,8 +30,7 @@ int ChemSyn::derivative(realtype t, N_Vector *y, N_Vector *ydot) {
   yi = NV_DATA_S(yn);
   yd = NV_DATA_S(ydn);
   //cout << "idx of chemsyn " << idx << "\n";
-  ut = yi[idx]; xt=yi[idx+1]; yt=yi[idx+2];
-  zt = yi[idx+3];
+  ut = yi[idx]; 
   
   /* detect the maximum outside of the derivative method 
      Once we detect a maximum, we have a discontinuity
@@ -48,19 +47,23 @@ int ChemSyn::derivative(realtype t, N_Vector *y, N_Vector *ydot) {
      Use 4/5 adaptive Runge-Kutta for synapse models that involve
      discontinuities
   */
-   cout  << t << "\t" << source->max << "\n";
+      //cout  << t << "\t" << source->max << "\n";
   /* del(t-t0) */
+
   if(source->max) {
-   
     flag = 1;
+        //cout << "Found Max: Incorporate discontinuity\n";
+    yd[idx] = -5*ut;
   } else {
     flag = 0;
+    yd[idx] = -ut;
   }
-  // cout << "flag = " << flag << "\n";
-  yd[idx] = -(ut/tauFacil) + 0.01*(1-ut)*flag;
-  yd[idx+1] = zt/tauRec - ut*xt*flag;
-  yd[idx+2] = -(yt/tauDecay) + ut*xt*flag;
-  yd[idx+3] = (yt/tauDecay) - zt/tauRec;
+  
+      // cout << "flag = " << flag << "\n";
+      // yd[idx] = 0;//-(ut/tauFacil) + 1;//0.01*(1-ut)*flag;
+  // yd[idx+1] = zt/tauRec - ut*xt*flag;
+  // yd[idx+2] = -(yt/tauDecay) + ut*xt*flag;
+  // yd[idx+3] = (yt/tauDecay) - zt/tauRec;
 
   //cout << "AT time: " << t << "\t" << ut << "\n";
   return(0);

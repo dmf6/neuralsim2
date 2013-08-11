@@ -52,5 +52,8 @@ class CVodeSolver {
     int rootInit(int, gFn);
 
     int getRootInfo(int *);
+
+    int reinit(realtype t);
+    
 };
 #endif /* _CVODESOLVER_H_INCLUDED */

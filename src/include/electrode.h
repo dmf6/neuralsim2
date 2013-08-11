@@ -33,8 +33,7 @@ class Electrode {
     int waveform;
     realtype bias;
     Random rand;
-    vector<double> noise;
-    static int count;
+    int enabled;
     
         /* target neuron and amplitude (amplitude is common to both zap and pulse) */
     Electrode(Neuron *, realtype inI);
@@ -51,6 +50,7 @@ class Electrode {
     void setWaveform(int w);
     void setBias(realtype b);
     void setAmplitude(realtype);
+    int isEnabled();
 };
 
 #endif

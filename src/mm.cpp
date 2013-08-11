@@ -27,16 +27,17 @@ int main(int argc, char *argv[]) {
   
     string id;
     double upper_bound, lower_bound;
-    realtype t, tout, reltol;
+    realtype reltol;
     N_Vector yi, yo, yd, abstol;
     int solver;
-    int flag, flagr, iout;
+    int flag, flagm, flagr, iout;
     int numVars;
     ofstream os;
     list<Neuron *> neurs;
     list<Synapse *> syns;
     int rootsfound[2];
-
+    int tInj[2] = {2000, 3500};
+ 
     int mode = ICLAMP;
     double *par_ptr = new double[NUM_PARS];
          
@@ -69,11 +70,11 @@ int main(int argc, char *argv[]) {
     Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
     ab->setIdx(0);
     Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
-    //Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
-    //resonantSyn->setIdx(NEQ);
+    Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
+    resonantSyn->setIdx(NEQ);
     
     /* set up y vector and tolerances */
-    numVars = NEQ;
+    numVars = NEQ + NEQSYN;
     cout << numVars <<"\n";
     yi = N_VNew_Serial(numVars);
     yo = N_VNew_Serial(numVars);
@@ -84,14 +85,14 @@ int main(int argc, char *argv[]) {
     /* initialize neuron and synapse state variables */
     ab->init(yi, PD_INIVARS);
     ab->setTol(abstol);
-    //resonantSyn->init(yi, SYN_INIVARS);
-    //resonantSyn->setTol(abstol);
+    resonantSyn->init(yi, SYN_INIVARS);
+    resonantSyn->setTol(abstol);
 
     /* add neurons to the list */
     neurs.push_back(ab);
     neurs.push_back(sc);
     /* add synapses to the list */
-    //syns.push_back(resonantSyn);
+    syns.push_back(resonantSyn);
 
         /* create synapses and add to list */
     /* Synapse *gapAB = new Gap(ab, pd, 1, 1);
@@ -103,10 +104,11 @@ int main(int argc, char *argv[]) {
     */
    
         /* create electrode to drive sc neuron membrane potential with ZAP*/
-    Electrode *e = new Electrode(sc, 0.0);
-    e->setWaveform(ZAP);
-    e->setDuration(TSTOP);
-    e->setBias(-60);
+    Electrode *e = new Electrode(ab, 0.0);
+    e->setWaveform(PULSE);
+    e->setStart(2000);
+    e->setDuration(1500);
+    e->setBias(0);
     
     /* switch on numerical method given in command-line arguments */
     NeuronModel *model = new NeuronModel(&neurs, &syns, numVars, os);
@@ -117,8 +119,7 @@ int main(int argc, char *argv[]) {
     CVodeSolver *cvode = new CVodeSolver(numVars, yi, abstol, model, myfunc);
     gFn myRootFunc = &g;
     cvode->rootInit(2, myRootFunc); 
-    //cvode->setStopTime(TSTOP);
- 
+
         /* class for RK fadvance */
     RK *rk = new RK(numVars, 2);
 
@@ -136,7 +137,6 @@ int main(int argc, char *argv[]) {
     ofstream out;
     out.open(filename.c_str());
 
-    realtype isyn = 0.0; tout = 0.0;
     int count = 0;
 
     out.unsetf(ios::floatfield);            // floatfield not set
@@ -150,10 +150,11 @@ int main(int argc, char *argv[]) {
      *                     start CVode loop (only use for current clamp)
      *
      ******************************************************************/  
-    iout = 0;  tout = T1;
+
     double dt= 0.0001;
     double dtx= 0.005;
-
+    realtype t, tout;
+    tout = 0.0; iout = 0;  tout = T1;
     /* set solver to either CVODE or RK65 If we need to handle
        spike-mediated events in synaptic mechanisms then RK65 is the
        choice 
@@ -184,6 +185,10 @@ int main(int argc, char *argv[]) {
        if (check_flag(&flag, "CVodeRootInit", 1)) return(1);
 
     */
+    int e0, e1;
+    e0= 0; e1 = 0;
+    
+    
     solver = CVODE;
     while(1) {
       if (solver == RK65) {
@@ -197,7 +202,7 @@ int main(int argc, char *argv[]) {
 	}
 	e->setIapp(tout, 15, VCLAMP);
 	sc->clampVoltage(tout, yi, NULL, out);
-	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\n';
+	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
 	flag = sc->detectMaximum(tout);
       }
       else if (solver == CVODE) {
@@ -210,29 +215,41 @@ int main(int argc, char *argv[]) {
 	     first test this by checking when voltage are passing through
 	     a point on the rising phase
 	  */
-	  flagr = cvode->getRootInfo(rootsfound);
-	  if (check_flag(&flagr, "CVodeGetRootInfo", 1)) return(1);
-	  cout << rootsfound[0] << "\t" << rootsfound[1] << "\n";
-	  if (rootsfound[0] == 1) {
-	    cout << "The soma voltage is rising through -40\n";
-	  }
-	  if (rootsfound[1] == 1) {
-	    cout << "The axon voltage is rising through -40\n";
-	  }
-	}
+            flagr = cvode->getRootInfo(rootsfound);
+            if (check_flag(&flagr, "CVodeGetRootInfo", 1)) return(1);
+            cout << rootsfound[0] << "\t" << rootsfound[1] << "\n";
+            if (rootsfound[0] == 1) {
+                    //cout << "The soma voltage is rising through -40\n";
+            }
+            if (rootsfound[1] == 1) {
+                    //cout << "The axon voltage is rising through -40\n";
+            }
+        }
 	if (check_flag(&flag, "CVode", 1)) {
-	  break;
+            break;
 	}
 	if (flag == CV_SUCCESS) {
 	  iout++;
 	  tout += TSTEP;
 	}
 
-	e->setIapp(tout, 15, VCLAMP);
-	sc->clampVoltage(tout, yi, NULL, out);
-	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 13) << '\n';
-	flag = sc->detectMaximum(tout);
-
+        e->setIapp(tout, -2, ICLAMP);
+	//sc->clampVoltage(tout, yi, NULL, out);
+        out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
+	flagm = sc->detectMaximum(tout);
+            /* if electrode was turned on or off, signal to the
+               integrator to reinitialize
+               only reinit when current changes
+            */
+        if (e1=(e->isEnabled()) != e0 && (count < 2)) {
+            e0 = e1;
+            cout << "Electrode pulse\n";
+            cvode->reinit(tInj[count]);
+            count++;
+            cout << count << "sahsdfhshss\n";
+            
+        }
+        
 	if (tout > TSTOP) {
 	  break;
 	}   
@@ -266,6 +283,27 @@ int f(realtype t, N_Vector y, N_Vector dy, void *user_data) {
     return 0;   
 } 
 
+/*
+ * g routine. Compute functions g_i(t,y) for i = 0,1. 
+ */
+
+static int g(realtype t, N_Vector y, realtype *gout, void *user_data) {
+  realtype vSoma, vAxon;
+  /* to get the spike time, do exactly what we did in the function f
+     user data is a pointer to user data, the same as the user data
+     parameter passed to CVodeSetUserData.
+     NeuronModel *model = static_cast<NeuronModel *>(user_data);
+     get the required neuron from the list using its index
+     and check whether its spiking or max variables are 1
+     if so record the time
+     the func will be
+     gout[0] = t - tspk
+  */
+  vSoma = Ith(y,1); vAxon = Ith(y,13);
+  gout[0] = vSoma - RCONST(-40);
+  gout[1] = vAxon - RCONST(0.0);
+  return(0);
+}
 
 
 
@@ -306,24 +344,3 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
 }
 
 
-/*
- * g routine. Compute functions g_i(t,y) for i = 0,1. 
- */
-
-static int g(realtype t, N_Vector y, realtype *gout, void *user_data) {
-  realtype vSoma, vAxon;
-  /* to get the spike time, do exactly what we did in the function f
-     user data is a pointer to user data, the same as the user data
-     parameter passed to CVodeSetUserData.
-     NeuronModel *model = static_cast<NeuronModel *>(user_data);
-     get the required neuron from the list using its index
-     and check whether its spiking or max variables are 1
-     if so record the time
-     the func will be
-     gout[0] = t - tspk
-  */
-  vSoma = Ith(y,1); vAxon = Ith(y,13);
-  gout[0] = vSoma - RCONST(-40);
-  gout[1] = vAxon - RCONST(0.0);
-  return(0);
-}

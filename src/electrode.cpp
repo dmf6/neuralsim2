@@ -10,6 +10,7 @@ Electrode::Electrode(Neuron *intarget, realtype inI)  {
     target->electrodes.push_back(this);
     waveform = 0;
     bias = 0.0;
+    enabled=0;
 }
 
 void Electrode::setWaveform(int w) {
@@ -41,15 +42,14 @@ void Electrode::setIapp(realtype t, realtype amp, int mode)  {
             }
             break;
 
-        case PULSE:
-                /* command pulse of amplitude amp between START and
-                 * START + DURATION */
+        case PULSE:   
             if (((t - start) > 0) && (t < (start + duration))) {
                 current = bias + amp;
-                    // cout << current << "\t" << bias << "\t" << amp << "\n";
+                cout << "Electrode current is: " << current << "\n";
                 
-            }
-            else {
+                enabled = 1;
+            } else {
+                enabled = 0;
                 current = bias;
             }
             
@@ -78,4 +78,7 @@ void Electrode::setBias(realtype b) {
 }
 void Electrode::setAmplitude(realtype a) {
     amp = a;
+}
+int Electrode::isEnabled(){
+    return enabled;
 }

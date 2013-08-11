@@ -10,7 +10,7 @@ ABNeuron::ABNeuron(const string name=NULL, double *inp=NULL, int inpno=0, int in
     strcpy (outfile, name.c_str());
     strcat (outfile,".asc");
     out.open(outfile);
-    cout << varCount << "\t" << idx << "\t" << iVarNo << "\t" << k<< endl;
+        //cout << varCount << "\t" << idx << "\t" << iVarNo << "\t" << k<< endl;
 }
 
 ABNeuron::~ABNeuron() {
@@ -124,7 +124,12 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     icoup1 = GAXIAL*(v_a-v);
     
     if(mode == 0) {
-            yd[idx+0] =  (Iapp-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0-Isyn))/CM;     
+        if (electrodes[0]->isEnabled()) {
+            yd[idx] =  (Iapp-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0))/CM;
+        }
+        else {
+             yd[idx] =  (-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0))/CM;
+        }
     }
     else {
         yd[idx+0] = 0;

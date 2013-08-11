@@ -7,24 +7,19 @@
 #include "electrode.h"
 #include "chemsyn.h"
 #include "simplecell2.h"
-//#include "hh.h"
-//#include "pdneuron.h"
 #include "abneuron.h"
 //#include "gap.h"
 #include "neuronmodel.h"
 #include "CVodeSolver.h"
 #include "rk.h"
 
-
-
 int f(realtype t, N_Vector y, N_Vector dy, void* user_data);
 static int g(realtype t, N_Vector y, realtype *gout, void *user_data);
-
 void swap(N_Vector y, N_Vector yout);
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
 #define NEQ 17 /* Number of equations */
-#define NEQSYN 4
+#define NEQSYN 1
 
 //#define TSTEP  0.095367432    /* stepsize */
 #define TSTEP 0.05
@@ -41,7 +36,7 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 
 /* set initial calcium concentration at 10e-4 mM */
 double PD_INIVARS[NEQ] = {-60, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, -60.0, 0.0, 0.0, 0.0, 0.0};
-double SYN_INIVARS[NEQSYN] = {100.0, 100.0, 100.0, 100.0};
+double SYN_INIVARS[NEQSYN] = {1000.0};
 
 //double SC_INIVARS[NEQ] = {-60.0, 0.0, 0.0, 0.0, -60.0, 0.0, 0.0, 0.0};//1.66619e-05, 0.000197344, 0.000342989};// 0.000681673, 0.00797977, 0.0139604};
 
