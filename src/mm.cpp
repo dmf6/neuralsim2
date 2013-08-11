@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
 	  tout += TSTEP;
 	}
 
-        e->setIapp(tout, -1, ICLAMP);
+        
 	//sc->clampVoltage(tout, yi, NULL, out);
         out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
 	flagm = sc->detectMaximum(tout);
@@ -243,6 +243,7 @@ int main(int argc, char *argv[]) {
                turns on or off. At the same time, the RHS is changed in
                NeuronModel
             */
+        e->setIapp(tout, -1, ICLAMP);
         if ((e1=(e->isEnabled())) != e0) {
             e0 = e1;
             cvode->reinit(tInj[count]);
