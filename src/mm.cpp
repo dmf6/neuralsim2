@@ -233,21 +233,20 @@ int main(int argc, char *argv[]) {
 	  tout += TSTEP;
 	}
 
-        e->setIapp(tout, -2, ICLAMP);
+        e->setIapp(tout, -1, ICLAMP);
 	//sc->clampVoltage(tout, yi, NULL, out);
         out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
 	flagm = sc->detectMaximum(tout);
+        
             /* if electrode was turned on or off, signal to the
-               integrator to reinitialize
-               only reinit when current changes
+               integrator to reinitialize only reinit when electrode
+               turns on or off. At the same time, the RHS is changed in
+               NeuronModel
             */
-        if (e1=(e->isEnabled()) != e0 && (count < 2)) {
+        if ((e1=(e->isEnabled())) != e0) {
             e0 = e1;
-            cout << "Electrode pulse\n";
             cvode->reinit(tInj[count]);
-            count++;
-            cout << count << "sahsdfhshss\n";
-            
+            count++;           
         }
         
 	if (tout > TSTOP) {

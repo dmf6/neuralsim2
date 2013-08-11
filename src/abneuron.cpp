@@ -124,6 +124,7 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     icoup1 = GAXIAL*(v_a-v);
     
     if(mode == 0) {
+            /* change this to "if any of the electrodes are active */
         if (electrodes[0]->isEnabled()) {
             yd[idx] =  (Iapp-(Ih + Il + Ikd + INaP+Ia+ICaT+ICaS+IKCa+icoup0))/CM;
         }
