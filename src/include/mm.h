@@ -5,10 +5,9 @@
 #include "neuron.h"
 #include "synapse.h"
 #include "electrode.h"
-#include "chemsyn.h"
-#include "simplecell2.h"
 #include "abneuron.h"
-//#include "gap.h"
+ #include "pdneuron.h" 
+#include "gap.h"
 #include "neuronmodel.h"
 #include "CVodeSolver.h"
 #include "rk.h"
@@ -18,7 +17,7 @@ static int g(realtype t, N_Vector y, realtype *gout, void *user_data);
 void swap(N_Vector y, N_Vector yout);
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
-#define NEQ 17 /* Number of equations */
+#define NEQ 34 /* Number of equations */
 #define NEQSYN 1
 
 //#define TSTEP  0.095367432    /* stepsize */
@@ -35,12 +34,16 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 #define NUM_PARS 15 /* number of parameters */
 
 /* set initial calcium concentration at 10e-4 mM */
-double PD_INIVARS[NEQ] = {-60, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0001, 0.0, 0.0, 0.0, -60.0, 0.0, 0.0, 0.0, 0.0};
+double AB_INIVARS[17] = {-38.6992, 0.0289539, 0.232727, 0.0259491, 0.125504, 0.139297, 0.613146, 0.135393, 1.8862,
+                         0.0419444, 0.198714, 0.42555, -68.6553, 0.297358, 0.000221852, 0.982698, 0.000181668 };
+
+double PD_INIVARS[17] = {-32.9142, 0.0292655, 0.223969, 0.0323433, 0.125052, 0.129203, 0.730948,
+                         0.126772, 3.15326, 0.0574529, 0.184829, 0.431308, 36.636, 0.423301, 0.999846, 0.0275853, 0.000605812
+};
+
+
+                      
 double SYN_INIVARS[NEQSYN] = {1000.0};
-
-//double SC_INIVARS[NEQ] = {-60.0, 0.0, 0.0, 0.0, -60.0, 0.0, 0.0, 0.0};//1.66619e-05, 0.000197344, 0.000342989};// 0.000681673, 0.00797977, 0.0139604};
-
-//double SC_INIVARS[NEQ] = {-60, 0, 0, 0};
 
 /* run first in VCLAMP and then in ICLAMP */
 #define ICLAMP 0
@@ -52,6 +55,6 @@ double SYN_INIVARS[NEQSYN] = {1000.0};
 #define CVODE 5
 
 #define T1    RCONST(1.0)      /* first output time      */
-#define RTOL  RCONST(1.0e-8)   /* scalar relative tolerance            */
+#define RTOL  RCONST(1.0e-12)   /* scalar relative tolerance            */
 
 #endif /* _MM_H_INCLUDED_ */
