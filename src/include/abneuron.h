@@ -10,7 +10,7 @@
 /* maximal conductances  (uS) */
 #define GL 0.045
 #define GH 0.054
-#define GA 200
+#define GA 21.6
 #define  GKD 1890
 #define GCAT 55.2
 #define GCAS 9
@@ -34,7 +34,7 @@
 
 #define F 0.418
 #define CO 0.5
-#define TAUCA 303.0
+#define TAUCA 303
 #define CAO 13000 //(uM)
 
 class ABNeuron: public Neuron {
@@ -52,7 +52,7 @@ class ABNeuron: public Neuron {
     virtual ~ABNeuron();
     void set_p(double *);
     int derivative(realtype , N_Vector *, N_Vector *, void *);
-    void currents(realtype, N_Vector, N_Vector, ostream&);
+    void currents(realtype, N_Vector);
 };
 
 #endif

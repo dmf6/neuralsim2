@@ -16,10 +16,9 @@ CVodeSolver::CVodeSolver(int n, N_Vector yi, N_Vector abstol, NeuronModel *model
 
 CVodeSolver::~CVodeSolver() {
         // cout << "Deallocated CVode memory" << endl;
-    
-   N_VDestroy_Serial(yi);
-   N_VDestroy_Serial(abstol);
-   CVodeFree(&cvode_mem);
+    N_VDestroy_Serial(yi);
+    N_VDestroy_Serial(abstol);
+    CVodeFree(&cvode_mem);
 }
 
 /* make the call to perform the integration of the IVP */
@@ -32,15 +31,15 @@ int CVodeSolver::fadvance(realtype tout, realtype t) {
 }
 
 int CVodeSolver::setStopTime(realtype t) {
-  return CVodeSetStopTime(cvode_mem, t);
+    return CVodeSetStopTime(cvode_mem, t);
 }
 
 int CVodeSolver::rootInit(int n, gFn g) {
-  return CVodeRootInit(cvode_mem, n, g);
+    return CVodeRootInit(cvode_mem, n, g);
 }
 
 int CVodeSolver::getRootInfo(int *rootsfound) {
-  return CVodeGetRootInfo(cvode_mem, rootsfound);
+    return CVodeGetRootInfo(cvode_mem, rootsfound);
 }
 
 int CVodeSolver::reinit(realtype t1) {
@@ -51,7 +50,7 @@ int CVodeSolver::reinit(realtype t1) {
           method) interpolated to any value of t in the last internal step taken
           by cvode.
         */
-        //int flag;
-        //flag = CVodeGetDky(cvode_mem, t1, 0, yi);
+    int flag;
+    flag = CVodeGetDky(cvode_mem, t1, 0, yi);
     return CVodeReInit(cvode_mem, t1, yi); 
 }

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 #include <list>
 #include <vector>
 
@@ -36,7 +36,6 @@ class Neuron {
     static int idx_generator;
     int enabled, idx;
     realtype rm, cm;
-    int k;
     
   public:
     static int varCount;
@@ -62,7 +61,7 @@ class Neuron {
          * as an interface to describe the the available methods */
     virtual int derivative(realtype t, N_Vector *, N_Vector *, void *user_data) = 0;
         /*use currents function to save all the currents and sum to a file using os stream */
-    virtual void currents(realtype t, N_Vector, N_Vector, ostream&) = 0;
+    virtual void currents(realtype t, N_Vector) = 0;
     inline int getIdx() { return idx;}
     inline void setIdx(int n) { idx = n; }
     virtual void init(N_Vector, double *iniVars);
@@ -70,7 +69,7 @@ class Neuron {
     int getIVarNo();
     
     double getVoltage() {
-      return this->voltage;
+      return voltage;
     }
     void setVoltage(double v) {
       this->voltage = v;
@@ -78,5 +77,7 @@ class Neuron {
     void detectSpikes(double, N_Vector);
     int detectMaximum(double t);
     void clampVoltage(realtype, N_Vector, N_Vector, ostream&);
+    void writeStateVector(N_Vector y);
+    
 };
 #endif

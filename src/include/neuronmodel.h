@@ -28,6 +28,8 @@ class NeuronModel
          * RK4 can solve each one at time t */
     
     virtual void derivative(realtype t, N_Vector, N_Vector, void *);
+    void currents(realtype t, N_Vector y);
+    
 };
 
 #endif

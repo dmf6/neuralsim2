@@ -67,14 +67,13 @@ int main(int argc, char *argv[]) {
     }
     
     /* create neuron and synapse objects */
-    Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, NEQ, ICLAMP);
+    Neuron *ab = new ABNeuron("AB", par_ptr, NUM_PARS, 17, ICLAMP);
     ab->setIdx(0);
-    Neuron *sc = new SimpleCell2("SC", par_ptr, NUM_PARS, 0, VCLAMP);
-    Synapse *resonantSyn = new ChemSyn(sc, NULL, 1, NEQSYN, 125, 3, 100);
-    resonantSyn->setIdx(NEQ);
+    Neuron *pd = new PDNeuron("PD", par_ptr, NUM_PARS, 17, ICLAMP);
+    pd->setIdx(17);
     
     /* set up y vector and tolerances */
-    numVars = NEQ + NEQSYN;
+    numVars = NEQ;
     cout << numVars <<"\n";
     yi = N_VNew_Serial(numVars);
     yo = N_VNew_Serial(numVars);
@@ -83,32 +82,30 @@ int main(int argc, char *argv[]) {
     reltol = RTOL;
 
     /* initialize neuron and synapse state variables */
-    ab->init(yi, PD_INIVARS);
+    ab->init(yi, AB_INIVARS);
     ab->setTol(abstol);
-    resonantSyn->init(yi, SYN_INIVARS);
-    resonantSyn->setTol(abstol);
+    pd->init(yi, PD_INIVARS);
+    pd->setTol(abstol);
 
     /* add neurons to the list */
     neurs.push_back(ab);
-    neurs.push_back(sc);
+    neurs.push_back(pd);
     /* add synapses to the list */
-    syns.push_back(resonantSyn);
-
+    
         /* create synapses and add to list */
-    /* Synapse *gapAB = new Gap(ab, pd, 1, 1);
-       gapAB->setGmax(0);
-       Synapse *gapPD = new Gap(pd, ab, 1, 1);
-       gapPD->setGmax(0);
-       syns.push_back(gapAB);
-       syns.push_back(gapPD); 
-    */
+    Synapse *gapAB = new Gap(ab, pd, 1, 1);
+    gapAB->setGmax(0.75);
+    Synapse *gapPD = new Gap(pd, ab, 1, 1);
+    gapPD->setGmax(0.75);
+    syns.push_back(gapAB);
+    syns.push_back(gapPD); 
    
         /* create electrode to drive sc neuron membrane potential with ZAP*/
-    Electrode *e = new Electrode(ab, 0.0);
-    e->setWaveform(PULSE);
-    e->setStart(2000);
-    e->setDuration(1500);
-    e->setBias(0);
+    // Electrode *e = new Electrode(ab, 0.0);
+    // e->setWaveform(PULSE);
+    // e->setStart(2000);
+    // e->setDuration(1500);
+    // e->setBias(0);
     
     /* switch on numerical method given in command-line arguments */
     NeuronModel *model = new NeuronModel(&neurs, &syns, numVars, os);
@@ -155,41 +152,11 @@ int main(int argc, char *argv[]) {
     double dtx= 0.005;
     realtype t, tout;
     tout = 0.0; iout = 0;  tout = T1;
-    /* set solver to either CVODE or RK65 If we need to handle
-       spike-mediated events in synaptic mechanisms then RK65 is the
-       choice 
-    */
-    /* for CVode specifiy a rootfinding function that when evaluated to 0 
-       can signal that the integrator should be reinitialized
-       provide a function g whose output is 0 when (t - tspk) = 0
-       typedef int (*CVRootFn)(realtype t, N Vector y, realtype *gout,
-       void *user data);
-
-       To stop when the location of the discontinuity is determined by
-       the solution (implicitly-defined discontinuity), use the
-       rootfinding feature (available both in CVODE/CVODES and
-       IDA/IDAS). In other words, the location of the discontinuity is
-       the zero of some function g of the solution (i.e.,g(tdisc,
-       y(tdisc))=0). Note that, in this situation, you cannot use
-       CVodeSetStopTime to prevent the discontinuity from being "seen"
-       during this integration phase. Indeed, the rootfinding
-       algorithm relies on detecting sign changes in g and therefore
-       needs to be allowed to evaluate it (and implicitly the RHS) on
-       both sides of tdisc. Therefore, during this phase only, you
-       need to have a smooth extension over the discontinuity so that
-       the step across it and the subsequent rootfinding can be done
-       efficiently.
-
-       Call CVodeRootInit to specify the root function g with 2 components
-       flag = CVodeRootInit(cvode_mem, 2, g);
-       if (check_flag(&flag, "CVodeRootInit", 1)) return(1);
-
-    */
     int e0, e1;
     e0= 0; e1 = 0;
     
     
-    solver = CVODE;
+    solver = RK65;
     while(1) {
       if (solver == RK65) {
 	dtx= machine.integrate(tout, yi, yo, model, dt);
@@ -200,10 +167,7 @@ int main(int argc, char *argv[]) {
 	if (tout > TSTOP) {
 	  break;
 	}
-	e->setIapp(tout, 15, VCLAMP);
-	sc->clampVoltage(tout, yi, NULL, out);
-	out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
-	flag = sc->detectMaximum(tout);
+        out << tout << '\t' << Ith(yi, 1)<< "\t" << Ith(yi, 13) << "\t" << Ith(yi, 30) << '\t' << Ith(yi, 18) << "\n";
       }
       else if (solver == CVODE) {
 	flag = cvode->fadvance(tout, t);
@@ -217,14 +181,20 @@ int main(int argc, char *argv[]) {
 	  */
             flagr = cvode->getRootInfo(rootsfound);
             if (check_flag(&flagr, "CVodeGetRootInfo", 1)) return(1);
-            cout << rootsfound[0] << "\t" << rootsfound[1] << "\n";
+                //cout << rootsfound[0] << "\t" << rootsfound[1] << "\n";
             if (rootsfound[0] == 1) {
-                    //cout << "The soma voltage is rising through -40\n";
+                    cout << "The soma voltage is rising through -40\n";
             }
             if (rootsfound[1] == 1) {
-                    //cout << "The axon voltage is rising through -40\n";
+                    cout << "The axon voltage is rising through 0\n";
             }
         }
+        out << tout << '\t' << Ith(yi, 1)<< "\t" << Ith(yi, 13) << "\t" << Ith(yi, 30) << '\t' << Ith(yi, 18) << "\n";
+        
+            /* write a function in the NeuronModel class that loops
+             * through all neuron current functions */
+        model->currents(tout, yi);
+        
 	if (check_flag(&flag, "CVode", 1)) {
             break;
 	}
@@ -233,31 +203,35 @@ int main(int argc, char *argv[]) {
 	  tout += TSTEP;
 	}
 
-        e->setIapp(tout, -1, ICLAMP);
+        
 	//sc->clampVoltage(tout, yi, NULL, out);
-        out << tout << '\t' << e->getIapp()<< '\t' << ab->getVoltage() << "\t" << Ith(yi, 12) << "\t" << sc->getVoltage()<< '\t' << Ith(yi, 18) << "\n";
-	flagm = sc->detectMaximum(tout);
+    
+	// flagm = sc->detectMaximum(tout);
         
             /* if electrode was turned on or off, signal to the
                integrator to reinitialize only reinit when electrode
                turns on or off. At the same time, the RHS is changed in
                NeuronModel
             */
-        if ((e1=(e->isEnabled())) != e0) {
-            e0 = e1;
-            cvode->reinit(tInj[count]);
-            count++;           
-        }
+        //e->setIapp(tout, -1, ICLAMP);
+        // if ((e1=(e->isEnabled())) != e0) {
+        //     e0 = e1;
+        //     cvode->reinit(tInj[count]);
+        //     count++;           
+        // }
         
 	if (tout > TSTOP) {
 	  break;
 	}   
       }
     }
-    
+
+    ab->writeStateVector(yi);
+    pd->writeStateVector(yi);
+
     /* free up memory */
-    delete e;
-    delete ab;
+    //delete e;
+    delete ab; delete pd;
     delete model;
     delete [] par_ptr;
     delete cvode;
@@ -305,14 +279,6 @@ static int g(realtype t, N_Vector y, realtype *gout, void *user_data) {
 }
 
 
-
-
-
-
-
-
-
-
 static int check_flag(void *flagvalue, char *funcname, int opt)
 {
   int *errflag;
@@ -341,5 +307,3 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
 
   return(0);
 }
-
-

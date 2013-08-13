@@ -10,10 +10,10 @@
 /* maximal conductances  (uS) */
 #define GL 0.105
 #define GH 0.219
-#define GA 390.42
+#define GA 39.42
 #define  GKD 1576.8
-#define GCAT 10
-#define GCAS 54
+#define GCAT 22.5
+#define GCAS 60
 #define GKCA 251.85
 #define GNAP 4.38
 #define GPROC 0
@@ -23,7 +23,7 @@
 #define EH -20
 #define EK -80
 #define ENA 50
-#define EPROC 570
+#define EPROC 0
 
 #define GAXIAL 1.05//nS
 #define CM_AXON 6.0//uF
@@ -51,7 +51,7 @@ class PDNeuron: public Neuron {
     virtual ~PDNeuron();
     void set_p(double *);
     int derivative(realtype , N_Vector *, N_Vector *, void *);
-    void currents(realtype, N_Vector, N_Vector, ostream&);
+    void currents(realtype, N_Vector);
 };
 
 #endif

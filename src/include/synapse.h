@@ -10,6 +10,8 @@ class Synapse {
     double gmax;
     double erev;
     int idx;
+    Neuron *source;
+    Neuron *target;
     
   private:
     static int idx_generator;
@@ -19,8 +21,7 @@ class Synapse {
     static int varCount;
     int type;
         /* have access to pre- and post-synaptic voltages through Neuron objects */
-    Neuron *source;
-    Neuron *target;
+
     int iVarNo;
 
     Synapse(Neuron *source, Neuron *target, int type, int iniVarNo);
