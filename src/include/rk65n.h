@@ -4,6 +4,7 @@
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
 #include <sundials/sundials_types.h> /* definition of type realtype */
 #include <math.h>
+#include <cfloat>
 #include "neuronmodel.h"
 
 /* #define min(X,Y) (X<Y ? X:Y) */
@@ -17,16 +18,17 @@ class RK65n {
   double a[9][8];
   double b[9];
   double newdt, dtx, theEps;
-  N_Vector Y[9];
-  N_Vector F[9];
+  
+  double *Y[9];
+  double *F[9];
   double *y5;
   double aF;
   double delta;
   int N;
   double maxdt, eps, abseps, releps; 
   int i, j, k;
-  realtype *ff, *yy;
   N_Vector yt;
+  
 public:
 
   /* arguments dim, maxdt, error ineps, abstol, reltol */

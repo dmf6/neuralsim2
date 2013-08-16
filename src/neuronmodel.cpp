@@ -32,8 +32,8 @@ void NeuronModel::derivative(realtype t, N_Vector y, N_Vector ydot, void *user_d
     }
 }
 
-void NeuronModel::currents(realtype t, N_Vector y) {
+void NeuronModel::currents(realtype t, N_Vector y, ostream &out) {
      forall(*neurs, niter) {
-         (*niter)->currents(t, y);
+         (*niter)->currents(t, y, out);
      }
 }

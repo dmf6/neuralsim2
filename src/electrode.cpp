@@ -82,3 +82,4 @@ void Electrode::setAmplitude(realtype a) {
 int Electrode::isEnabled(){
     return enabled;
 }
+

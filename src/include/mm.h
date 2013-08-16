@@ -6,7 +6,8 @@
 #include "synapse.h"
 #include "electrode.h"
 #include "abneuron.h"
- #include "pdneuron.h" 
+ #include "pdneuron.h"
+#include "simplecell.h"
 #include "gap.h"
 #include "neuronmodel.h"
 #include "CVodeSolver.h"
@@ -17,8 +18,8 @@ static int g(realtype t, N_Vector y, realtype *gout, void *user_data);
 void swap(N_Vector y, N_Vector yout);
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
-#define NEQ 34 /* Number of equations */
-#define NEQSYN 1
+#define NEQ 4 /* Number of equations */
+#define NEQSYN 4
 
 //#define TSTEP  0.095367432    /* stepsize */
 #define TSTEP 0.05
@@ -29,7 +30,7 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
                                          // integer multiple number of
                                          // cycles
 #define T0 0.095367432            /* start time */
-#define TSTOP 6000  /* duration */
+#define TSTOP 100000  /* duration */
 
 #define NUM_PARS 15 /* number of parameters */
 
@@ -41,9 +42,12 @@ double PD_INIVARS[17] = {-32.9142, 0.0292655, 0.223969, 0.0323433, 0.125052, 0.1
                          0.126772, 3.15326, 0.0574529, 0.184829, 0.431308, 36.636, 0.423301, 0.999846, 0.0275853, 0.000605812
 };
 
+double SC_INIVARS[4] = {-60, 0.0, 0.0, 0.0
+};
+double ABSTOL[4] = {1.0e-12, 1.0e-12, 1.0e-12, 1.0e-12, 
+};
 
-                      
-double SYN_INIVARS[NEQSYN] = {1000.0};
+double SYN_INIVARS[NEQSYN] = {-60, 0.2, 0.3, 0.3};
 
 /* run first in VCLAMP and then in ICLAMP */
 #define ICLAMP 0

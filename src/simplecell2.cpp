@@ -28,4 +28,4 @@ int SimpleCell2::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_
   return (0);
 }
 
-void SimpleCell2::currents(realtype  t, N_Vector y, N_Vector ydot, ostream& out) {}
+void SimpleCell2::currents(realtype  t, N_Vector y) {}

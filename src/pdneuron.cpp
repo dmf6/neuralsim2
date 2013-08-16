@@ -186,5 +186,3 @@ void PDNeuron::currents(realtype  t, N_Vector y) {
     out << t  << "\t" << Il<<  "\t" << Ih << '\t' << Ia << "\t" << Ikd << "\t" << ICaT << "\t" << ICaS << "\t" << IKCa << "\t" << INaP << "\n";
     
 }
-
-

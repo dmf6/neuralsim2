@@ -7,6 +7,7 @@
 #include <cmath>
 #include <list>
 #include <vector>
+#include <queue>
 
 #include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
@@ -38,7 +39,6 @@ class Neuron {
     realtype rm, cm;
     
   public:
-    static int varCount;
     list<Synapse *> den;       /* list of all incoming synapses and electrodes */
     list<Synapse *>::const_iterator den_it;
     vector <Electrode *> electrodes;
@@ -53,6 +53,8 @@ class Neuron {
     string name;
     int max;
     int mode;
+    double v1, v2, v3;
+    realtype *vi;
         //iniVarNo is number of state variables
     Neuron(const string name, int iniVarNo, int mode);
     virtual ~Neuron();
@@ -61,7 +63,8 @@ class Neuron {
          * as an interface to describe the the available methods */
     virtual int derivative(realtype t, N_Vector *, N_Vector *, void *user_data) = 0;
         /*use currents function to save all the currents and sum to a file using os stream */
-    virtual void currents(realtype t, N_Vector) = 0;
+    virtual void currents(realtype t, N_Vector, ostream&) = 0;
+        //virtual void currents(realtype t, N_Vector) = 0;
     inline int getIdx() { return idx;}
     inline void setIdx(int n) { idx = n; }
     virtual void init(N_Vector, double *iniVars);
@@ -74,10 +77,9 @@ class Neuron {
     void setVoltage(double v) {
       this->voltage = v;
     }
-    void detectSpikes(double, N_Vector);
+    int detectSpikes(double, N_Vector);
     int detectMaximum(double t);
     void clampVoltage(realtype, N_Vector, N_Vector, ostream&);
     void writeStateVector(N_Vector y);
-    
 };
 #endif

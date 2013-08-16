@@ -3,9 +3,8 @@
 Gap::Gap(Neuron *source, Neuron *target, int type, int iniVarNo)
     : Synapse(source, target, type, iniVarNo) {
     ISyn = 0;
-        cout << target->voltage << "\n";
-        this->target = target;
-        this->source = source;
+    this->target = target;
+    this->source = source;
         
 }
 
@@ -34,3 +33,4 @@ double Gap::getISyn(){
          * associated with the target neuron */
     return gmax*(target->voltage-source->voltage);
 }
+

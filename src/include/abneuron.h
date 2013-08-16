@@ -39,7 +39,6 @@
 
 class ABNeuron: public Neuron {
     int type;
-    int m_dValue;
     int pno;
     double *p;
     ofstream out;

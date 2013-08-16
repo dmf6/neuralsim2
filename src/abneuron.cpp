@@ -127,7 +127,7 @@ int ABNeuron::derivative(realtype t, N_Vector *y, N_Vector *ydot, void *user_dat
     icoup1 = 0.3*(v_a-v);
 
             /* change this to "if any of the electrodes are active */
-    yd[idx] =  (-(Ih+Il+Ikd+INaP+Ia+ICaT+ICaS+IKCa+IProc+icoup0+Isyn))/9;    
+    yd[idx] =  (Iapp-(Ih+Il+Ikd+INaP+Ia+ICaT+ICaS+IKCa+IProc+icoup0+Isyn))/9;    
 
 
     voltage = v;

@@ -10,7 +10,6 @@ ChemSyn::ChemSyn(Neuron *source, Neuron *target, int type, int iniVarNo,
     this->tauDecay=tauDecay;
     ISyn = 0;
     erev = -70;
-    k = varCount - iVarNo;
 }
 
 

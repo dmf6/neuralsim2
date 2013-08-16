@@ -15,9 +15,11 @@ CVodeSolver::CVodeSolver(int n, N_Vector yi, N_Vector abstol, NeuronModel *model
 }
 
 CVodeSolver::~CVodeSolver() {
-        // cout << "Deallocated CVode memory" << endl;
-    N_VDestroy_Serial(yi);
-    N_VDestroy_Serial(abstol);
+        // cout << "Deallocated CVode memory" << endl; The main
+        //program deallocates this memory since yi and abstol can be
+        //used by other solvers.
+        //N_VDestroy_Serial(yi);
+        //N_VDestroy_Serial(abstol);
     CVodeFree(&cvode_mem);
 }
 

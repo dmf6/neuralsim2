@@ -18,7 +18,6 @@ class Synapse {
     int enabled;
     
   public:
-    static int varCount;
     int type;
         /* have access to pre- and post-synaptic voltages through Neuron objects */
 
@@ -43,3 +42,4 @@ class Synapse {
 };
 
 #endif/* _SYNAPSE_H_INCLUDED_*/
+
